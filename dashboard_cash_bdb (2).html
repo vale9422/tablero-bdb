@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Cash Management — Banco de Bogotá 2023–2025</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#1c2433;--bg4:#21262d;
+  --border:#30363d;--border2:#444c56;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --blue:#58a6ff;--blue-dim:rgba(88,166,255,.15);
+  --green:#3fb950;--green-dim:rgba(63,185,80,.15);
+  --amber:#d29922;--amber-dim:rgba(210,153,34,.15);
+  --red:#f85149;--red-dim:rgba(248,81,73,.15);
+  --purple:#bc8cff;--purple-dim:rgba(188,140,255,.15);
+  --r:8px;--r2:12px;
+}
+html,body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;min-height:100vh;}
+strong{font-weight:500;}
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto;}
+.sidebar-logo{padding:20px 16px 12px;border-bottom:1px solid var(--border);}
+.logo-mark{width:28px;height:28px;background:var(--blue);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:#fff;margin-right:8px;vertical-align:middle;}
+.logo-text{font-size:13px;font-weight:500;color:var(--text);vertical-align:middle;}
+.logo-sub{font-size:10px;color:var(--text2);margin-top:4px;padding-left:36px;}
+.sidebar-section{padding:12px 8px 4px;}
+.sidebar-section-label{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:0 8px;margin-bottom:4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;border:none;background:transparent;width:100%;text-align:left;}
+.nav-item:hover{background:var(--bg3);color:var(--text);}
+.nav-item.active{background:var(--blue-dim);color:var(--blue);}
+.nav-icon{width:16px;height:16px;opacity:.7;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--bg4);color:var(--text2);font-size:10px;padding:1px 6px;border-radius:20px;}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;flex-wrap:wrap;gap:8px;}
+.topbar-left{display:flex;flex-direction:column;}
+.topbar-title{font-size:15px;font-weight:500;color:var(--text);}
+.topbar-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.seg-pill{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.seg-pill:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
+.seg-pill.on{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);font-weight:600;}
+.seg-pill.corp.on{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
+.seg-pill.emp.on{border-color:var(--green);color:var(--green);background:var(--green-dim);}
+.seg-pill.ofic.on{border-color:var(--amber);color:var(--amber);background:var(--amber-dim);}
+.seg-indicator{font-size:11px;color:var(--text3);padding:4px 10px;border-radius:6px;background:var(--bg4);display:none;}
+.seg-indicator.show{display:inline-block;}
+.content{padding:20px 24px;flex:1;}
+.page{display:none;}.page.active{display:block;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px;}
+.kpi-row-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:20px;}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px 18px;transition:border-color .2s;}
+.kpi-lbl{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.kpi-val{font-size:26px;font-weight:600;color:var(--text);line-height:1;font-family:'IBM Plex Mono',monospace;}
+.kpi-footer{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;}
+.up{color:var(--green);font-weight:500;}.dn{color:var(--red);font-weight:500;}.neutral{color:var(--text2);}
+.kpi-bar{height:3px;background:var(--bg4);border-radius:2px;margin-top:10px;overflow:hidden;}
+.kpi-fill{height:100%;border-radius:2px;transition:width .6s ease;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.grid-7030{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+.grid-3070{display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-bottom:16px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px;margin-bottom:0;}
+.card-title{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.card-title span{color:var(--text3);font-weight:400;font-size:10px;text-transform:none;letter-spacing:0;}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:10px;}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
+.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;padding:8px 12px;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bg3);}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;}
+.corp{background:var(--blue-dim);color:var(--blue);}
+.emp{background:var(--green-dim);color:var(--green);}
+.ofic{background:var(--amber-dim);color:var(--amber);}
+.pyme{background:var(--purple-dim);color:var(--purple);}
+.section-title{font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
+.formula{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:0 var(--r) var(--r) 0;padding:10px 14px;margin:8px 0;font-size:12px;font-family:'IBM Plex Mono',monospace;}
+.formula small{display:block;font-family:'IBM Plex Sans',sans-serif;font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+.prog-row{margin-bottom:10px;}
+.prog-head{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;color:var(--text2);}
+.prog-head strong{color:var(--text);font-weight:500;}
+.prog-bar{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;transition:width .8s ease;}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
+.info-row:last-child{border-bottom:none;}
+.info-name{font-size:12px;font-weight:500;color:var(--text);}
+.info-sub{font-size:11px;color:var(--text2);}
+.info-val{font-size:16px;font-weight:600;font-family:'IBM Plex Mono',monospace;text-align:right;}
+.chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;margin-left:6px;}
+.chip-ok{background:var(--green-dim);color:var(--green);}
+.chip-warn{background:var(--amber-dim);color:var(--amber);}
+.chip-risk{background:var(--red-dim);color:var(--red);}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.footer{background:var(--bg2);border-top:1px solid var(--border);padding:12px 24px;font-size:11px;color:var(--text3);display:flex;justify-content:space-between;}
+@media(max-width:1200px){.kpi-row{grid-template-columns:repeat(2,1fr);}.grid2,.grid-7030,.grid-3070{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-mark">B</span>
+    <span class="logo-text">Banco de Bogotá</span>
+    <div class="logo-sub">Cash Management Analytics</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Análisis</div>
+    <button class="nav-item active" onclick="goTo('overview',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      Visión general
+    </button>
+    <button class="nav-item" onclick="goTo('rentabilidad',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 8L9 10L14 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Rentabilidad
+      <span class="nav-badge">2</span>
+    </button>
+    <button class="nav-item" onclick="goTo('cosechas',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Negocios ganados
+      <span class="nav-badge">3</span>
+    </button>
+    <button class="nav-item" onclick="goTo('reciprocidad',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 5l3 3-3 3M6 5l-3 3 3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Reciprocidad
+    </button>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">KPIs Económicos</div>
+    <button class="nav-item" onclick="goTo('roa',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M4 6l4-4 4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      ROA Depósitos
+    </button>
+    <button class="nav-item" onclick="goTo('ror',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5" cy="8" r="3" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="8" r="3" stroke="currentColor" stroke-width="1.2"/></svg>
+      Return on Relationship
+    </button>
+    <button class="nav-item" onclick="goTo('fondeo',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 13h12M4 13V7l4-4 4 4v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Fondeo Vital
+    </button>
+    <button class="nav-item" onclick="goTo('velocidad',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 8a6 6 0 1112 0M8 8l-3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Velocidad del dinero
+    </button>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Portafolio</div>
+    <button class="nav-item" onclick="goTo('clientes',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Top clientes
+    </button>
+    <button class="nav-item" onclick="goTo('maestro',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Cuadro maestro
+    </button>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title" id="page-title">Visión general del portafolio</div>
+      <div class="topbar-sub">Area de Cash Management · Vicepresidencia Banca Empresas · Ene 2023 – May 2025</div>
+    </div>
+    <div class="topbar-right">
+      <span style="font-size:11px;color:var(--text3);">Filtrar por segmento:</span>
+      <button class="seg-pill on" id="pill-todos" onclick="setSeg('Todos',this)">Todos</button>
+      <button class="seg-pill corp" id="pill-corp" onclick="setSeg('Corporativo',this)">Corporativo</button>
+      <button class="seg-pill emp" id="pill-emp" onclick="setSeg('Empresarial',this)">Empresarial</button>
+      <button class="seg-pill ofic" id="pill-ofic" onclick="setSeg('Oficial',this)">Oficial</button>
+      <span class="seg-indicator" id="seg-indicator"></span>
+    </div>
+  </div>
+
+  <div class="content">
+
+  <!-- ===== OVERVIEW ===== -->
+  <div class="page active" id="page-overview">
+    <div class="kpi-row" id="kpi-overview"></div>
+    <div class="grid-7030">
+      <div class="card">
+        <div class="card-title">Flujos de entrada mensuales — serie de tiempo <span id="lbl-fe-time">todos los segmentos · MM COP</span></div>
+        <div class="legend">
+          <span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Flujos entrada</span>
+          <span class="leg"><span class="leg-dot" style="background:#f85149"></span>Flujos salida</span>
+          <span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Flujo neto</span>
+        </div>
+        <div style="position:relative;height:220px"><canvas id="ch-fe-time"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Empresas por segmento</div>
+        <div style="position:relative;height:160px"><canvas id="ch-donut"></canvas></div>
+        <div style="margin-top:8px">
+          <div class="prog-row"><div class="prog-head"><span>Corporativo</span><strong>5,059 · 36.2%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:50%;background:#58a6ff"></div></div></div>
+          <div class="prog-row"><div class="prog-head"><span>Empresarial</span><strong>5,884 · 42.1%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:58%;background:#3fb950"></div></div></div>
+          <div class="prog-row"><div class="prog-head"><span>Oficial</span><strong>2,819 · 20.2%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:28%;background:#d29922"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Comisiones por segmento y año <span>COP · % participación</span></div>
+        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Corporativo</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Empresarial</span><span class="leg"><span class="leg-dot" style="background:#d29922"></span>Oficial</span></div>
+        <div style="position:relative;height:190px"><canvas id="ch-com-seg"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Flujos de entrada por segmento y año <span>MM COP · % participación</span></div>
+        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Corporativo</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Empresarial</span><span class="leg"><span class="leg-dot" style="background:#d29922"></span>Oficial</span></div>
+        <div style="position:relative;height:190px"><canvas id="ch-fe-seg"></canvas></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Negocios ganados por año <span>% var. interanual</span></div>
+        <div style="position:relative;height:180px"><canvas id="ch-neg-yr"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Comisiones mensuales por segmento <span>COP</span></div>
+        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Corporativo</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Empresarial</span><span class="leg"><span class="leg-dot" style="background:#d29922"></span>Oficial</span></div>
+        <div style="position:relative;height:150px"><canvas id="ch-com-seg-monthly"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RENTABILIDAD ===== -->
+  <div class="page" id="page-rentabilidad">
+    <div class="kpi-row" id="kpi-rentabilidad"></div>
+    <div class="grid-7030">
+      <div class="card">
+        <div class="card-title">Evolución mensual comisiones <span id="lbl-rent">por segmento · COP</span></div>
+        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Corp.</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Emp.</span><span class="leg"><span class="leg-dot" style="background:#d29922"></span>Ofic.</span></div>
+        <div style="position:relative;height:230px"><canvas id="ch-rent-monthly"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Participación 2024 <span>% del total</span></div>
+        <div style="position:relative;height:160px"><canvas id="ch-rent-pie"></canvas></div>
+        <div style="margin-top:10px">
+          <div class="info-row"><div><div class="info-name">Corporativo</div></div><div class="info-val" style="color:#58a6ff">85.8%</div></div>
+          <div class="info-row"><div><div class="info-name">Empresarial</div></div><div class="info-val" style="color:#3fb950">10.1%</div></div>
+          <div class="info-row"><div><div class="info-name">Oficial</div></div><div class="info-val" style="color:#d29922">4.1%</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Flujo neto por año <span>MM COP · % variación</span></div>
+        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Entrada</span><span class="leg"><span class="leg-dot" style="background:#f85149"></span>Salida</span></div>
+        <div style="position:relative;height:190px"><canvas id="ch-flujo-neto"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cuadro comparativo por segmento</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Segmento</th><th>2023 (K)</th><th>2024 (K)</th><th>2025 YTD</th><th>Var.</th><th>Part.%</th></tr></thead>
+            <tbody id="tb-rent"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:14px">
+          <div class="prog-row"><div class="prog-head"><span>MC/empresa Corporativo</span><strong>$924K · 85.8%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:100%;background:#58a6ff"></div></div></div>
+          <div class="prog-row"><div class="prog-head"><span>MC/empresa Oficial</span><strong>$72K · 4.1%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:7.8%;background:#d29922"></div></div></div>
+          <div class="prog-row"><div class="prog-head"><span>MC/empresa Empresarial</span><strong>$68K · 10.1%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:7.4%;background:#3fb950"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== COSECHAS ===== -->
+  <div class="page" id="page-cosechas">
+    <div class="kpi-row" id="kpi-cosechas"></div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Negocios ganados por segmento y año <span>% var.</span></div>
+        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Corp.</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Emp.</span><span class="leg"><span class="leg-dot" style="background:#d29922"></span>Ofic.</span></div>
+        <div style="position:relative;height:210px"><canvas id="ch-neg-seg"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top 12 productos más negociados <span>% part.</span></div>
+        <div style="position:relative;height:210px"><canvas id="ch-prod"></canvas></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Crecimiento empresas captadas <span>% acumulado</span></div>
+        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Corp.</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Emp.</span><span class="leg"><span class="leg-dot" style="background:#d29922"></span>Ofic.</span></div>
+        <div style="position:relative;height:190px"><canvas id="ch-emp-growth"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top empresas por negocios ganados</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Empresa</th><th>Seg.</th><th>Negocios</th><th>Part.%</th><th>Producto líder</th></tr></thead>
+          <tbody>
+            <tr><td>Fiduciaria Bogotá</td><td><span class="badge corp">Corp.</span></td><td>137</td><td>1.0%</td><td>Barras, Disfon</td></tr>
+            <tr><td>Santiago de Cali</td><td><span class="badge ofic">Ofic.</span></td><td>120</td><td>0.9%</td><td>Adquirencia</td></tr>
+            <tr><td>Terpel</td><td><span class="badge corp">Corp.</span></td><td>84</td><td>0.6%</td><td>Adquirencia</td></tr>
+            <tr><td>Amarilo</td><td><span class="badge corp">Corp.</span></td><td>76</td><td>0.5%</td><td>Adquirencia</td></tr>
+            <tr><td>Emcali</td><td><span class="badge ofic">Ofic.</span></td><td>72</td><td>0.5%</td><td>Adquirencia</td></tr>
+            <tr><td>Fiduciaria Bogotá 2</td><td><span class="badge corp">Corp.</span></td><td>67</td><td>0.5%</td><td>Barras, Disfon</td></tr>
+            <tr><td>Sidoc S.A.S.</td><td><span class="badge corp">Corp.</span></td><td>55</td><td>0.4%</td><td>Tarjeta Crédito</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RECIPROCIDAD ===== -->
+  <div class="page" id="page-reciprocidad">
+    <div class="kpi-row" id="kpi-reciprocidad"></div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Reciprocidad mensual — Flujos entrada vs Saldos CC+CA <span>eje dual · MM COP</span></div>
+      <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Flujos entrada (izq.)</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Saldos CC+CA (der.)</span></div>
+      <div style="position:relative;height:220px"><canvas id="ch-recip-dual"></canvas></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Saldos promedio por año <span>CC y CA · % var.</span></div>
+        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Saldo CC</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Saldo CA</span></div>
+        <div style="position:relative;height:200px"><canvas id="ch-saldos-yr"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Coeficiente de retención mensual <span>Saldo / Flujo</span></div>
+        <div style="position:relative;height:200px"><canvas id="ch-retencion"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ROA ===== -->
+  <div class="page" id="page-roa">
+    <div class="kpi-row-3" id="kpi-roa"></div>
+    <div class="grid-3070">
+      <div class="card">
+        <div class="card-title">ROA por segmento 2024</div>
+        <div class="info-row"><div><div class="info-name">Corporativo</div><div class="info-sub">Alto vol., bajo costo captación</div></div><div><div class="info-val" style="color:#58a6ff">9.4%</div><span class="chip chip-ok">Óptimo</span></div></div>
+        <div class="info-row"><div><div class="info-name">Empresarial</div><div class="info-sub">Crecimiento acelerado</div></div><div><div class="info-val" style="color:#3fb950">8.1%</div><span class="chip chip-ok">Estable</span></div></div>
+        <div class="info-row"><div><div class="info-name">Oficial</div><div class="info-sub">Alta estacionalidad</div></div><div><div class="info-val" style="color:#d29922">7.6%</div><span class="chip chip-warn">Moderado</span></div></div>
+        <div style="margin-top:14px">
+          <div class="formula"><small>Fórmula adaptada Cash Management</small>ROA_dep = Comisiones / Saldo_dep_prom(CC+CA)</div>
+          <div class="formula" style="border-color:#3fb950"><small>FTP estimado (proxy BdB)</small>FTP_est ≈ Saldo_prom × 8.99%</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">ROA depósitos mensual estimado <span>%</span></div>
+        <div style="position:relative;height:250px"><canvas id="ch-roa-monthly"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">ROA depósitos por segmento 2023 vs 2024 vs 2025 <span>%</span></div>
+      <div style="position:relative;height:180px"><canvas id="ch-roa-seg"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ===== RoR ===== -->
+  <div class="page" id="page-ror">
+    <div class="kpi-row-3" id="kpi-ror"></div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Componentes del RoR — Estado de resultados BdB</div>
+        <div class="prog-row"><div class="prog-head"><span>Ingreso FTP depósitos (pasivo)</span><strong style="color:#58a6ff">8.99% · 84% del total</strong></div><div class="prog-bar"><div class="prog-fill" style="width:90%;background:#58a6ff"></div></div></div>
+        <div class="prog-row"><div class="prog-head"><span>Comisiones Cash</span><strong style="color:#bc8cff">0.37% · 4%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:4%;background:#bc8cff"></div></div></div>
+        <div class="prog-row"><div class="prog-head"><span>Margen intereses cartera</span><strong style="color:#3fb950">1.39% · 13%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:14%;background:#3fb950"></div></div></div>
+        <div class="prog-row"><div class="prog-head"><span>Otros ingresos</span><strong style="color:#8b949e">0.14% · 1%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:1.5%;background:#8b949e"></div></div></div>
+        <div style="margin-top:10px;font-size:11px;color:var(--text3);line-height:1.6">Fuente: Estado de resultados Banca Empresas oct-2023. El FTP depósitos representa el 83% del margen financiero neto total.</div>
+        <div style="margin-top:12px">
+          <div class="formula"><small>RoR completo</small>RoR = (Com_cash + FTP_dep + Margen_cart) / (Saldo_dep + Cartera)</div>
+          <div class="formula" style="border-color:#bc8cff"><small>Proxy disponible</small>RoR_proxy = Comisiones / (Saldo_CC + Saldo_CA)</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">RoR proxy por segmento — evolución 2023–2025 <span>%</span></div>
+        <div style="position:relative;height:200px"><canvas id="ch-ror-seg"></canvas></div>
+        <div style="margin-top:14px">
+          <div class="info-row"><div><div class="info-name">Corporativo</div><div class="info-sub">84% del Margen Fin. Neto</div></div><div class="info-val" style="color:#58a6ff">4.68%</div></div>
+          <div class="info-row"><div><div class="info-name">Empresarial</div><div class="info-sub">Mayor crecimiento captación</div></div><div class="info-val" style="color:#3fb950">3.88%</div></div>
+          <div class="info-row"><div><div class="info-name">Oficial</div><div class="info-sub">Estacionalidad tributaria</div></div><div class="info-val" style="color:#d29922">3.44%</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Radar desempeño multidimensional por segmento <span>Índices norm. 0–100</span></div>
+      <div style="position:relative;height:240px"><canvas id="ch-radar"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ===== FONDEO ===== -->
+  <div class="page" id="page-fondeo">
+    <div class="kpi-row-3" id="kpi-fondeo"></div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Estructura del fondeo 2024 <span>% participación</span></div>
+        <div class="info-row"><div><div class="info-name">Fondeo vital (transaccional)</div><div class="info-sub">CC + CA de clientes Cash activos</div></div><div><div class="info-val" style="color:#3fb950">41.7%</div><span class="chip chip-ok">Bajo costo</span></div></div>
+        <div class="info-row"><div><div class="info-name">Proveedores de liquidez</div><div class="info-sub">Depósitos alto vol., tasa-sensibles</div></div><div><div class="info-val" style="color:#d29922">38.2%</div><span class="chip chip-warn">Costo medio</span></div></div>
+        <div class="info-row"><div><div class="info-name">Ancla (CDT / largos plazos)</div><div class="info-sub">Sensibles a tasa, riesgo de salida</div></div><div><div class="info-val" style="color:#f85149">20.1%</div><span class="chip chip-risk">Alto costo</span></div></div>
+        <div style="margin-top:14px">
+          <div class="formula"><small>Índice de Fondeo Vital</small>IFV = Dep_cash / Dep_totales_banca</div>
+          <div class="formula" style="border-color:#3fb950"><small>Ahorro en costo de fondeo</small>Ahorro = Saldo_dep × (Tasa_CDT − Tasa_CC_vista) ≈ 4.5%</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Evolución IFV y ahorro estimado <span>% y MM COP</span></div>
+        <div style="position:relative;height:220px"><canvas id="ch-fondeo-ev"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Saldos CC + CA mensuales — base del fondeo vital <span>MM COP</span></div>
+      <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Saldo CC</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Saldo CA</span></div>
+      <div style="position:relative;height:180px"><canvas id="ch-saldos-monthly"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ===== VELOCIDAD ===== -->
+  <div class="page" id="page-velocidad">
+    <div class="kpi-row-3" id="kpi-velocidad"></div>
+    <div class="grid-3070">
+      <div class="card">
+        <div class="card-title">Días de permanencia por segmento</div>
+        <div class="info-row"><div><div class="info-name">Corporativo</div><div class="info-sub">Mayor volumen, ciclo corto</div></div><div><div class="info-val" style="color:#58a6ff">~38 días</div><span class="chip chip-ok">Alto fondeo</span></div></div>
+        <div class="info-row"><div><div class="info-name">Empresarial</div><div class="info-sub">Ciclo operacional medio</div></div><div><div class="info-val" style="color:#3fb950">~52 días</div><span class="chip chip-ok">Estable</span></div></div>
+        <div class="info-row"><div><div class="info-name">Oficial</div><div class="info-sub">Alta estacionalidad tributaria</div></div><div><div class="info-val" style="color:#d29922">~31 días</div><span class="chip chip-warn">Estacional</span></div></div>
+        <div style="margin-top:14px">
+          <div class="formula"><small>Velocidad transaccional (MV = PQ)</small>V_tx = Flujos_entrada_acum / Saldo_prom_CC+CA</div>
+          <div class="formula" style="border-color:#d29922"><small>Días de permanencia (seguimiento BdB)</small>D_perm = Saldo_prom × 365 / Flujos_entrada</div>
+        </div>
+        <div style="margin-top:12px;font-size:11px;color:var(--text3);line-height:1.6">El segmento empresarial es más valioso por permanencia que por volumen. Mayor permanencia = más fondeo vital de bajo costo.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Velocidad transaccional mensual <span>Flujos / Saldo dep. — ×</span></div>
+        <div style="position:relative;height:260px"><canvas id="ch-velocidad"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Velocidad por segmento 2023–2025 <span>% variación interanual</span></div>
+      <div style="position:relative;height:180px"><canvas id="ch-vel-seg"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ===== CLIENTES ===== -->
+  <div class="page" id="page-clientes">
+    <div class="kpi-row-3" id="kpi-clientes"></div>
+    <div class="grid-7030">
+      <div class="card">
+        <div class="card-title">Top 15 clientes por comisiones acumuladas 2023–2025 <span>COP · % del total portafolio</span></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>#</th><th>Empresa</th><th>Seg.</th><th>Comisiones</th><th>% Total</th><th>Participación</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>EPS Sanitas S.A.S</td><td><span class="badge corp">Corp.</span></td><td>$764,074</td><td>31.5%</td><td><div class="prog-bar"><div class="prog-fill" style="width:100%;background:#58a6ff"></div></div></td></tr>
+            <tr><td>2</td><td>Mercadopago Colombia Ltda</td><td><span class="badge corp">Corp.</span></td><td>$355,477</td><td>14.7%</td><td><div class="prog-bar"><div class="prog-fill" style="width:46.5%;background:#58a6ff"></div></div></td></tr>
+            <tr><td>3</td><td>Fiduciaria Bogotá S.A.</td><td><span class="badge corp">Corp.</span></td><td>$103,443</td><td>4.3%</td><td><div class="prog-bar"><div class="prog-fill" style="width:13.5%;background:#3fb950"></div></div></td></tr>
+            <tr><td>4</td><td>Organización Terpel S.A.</td><td><span class="badge corp">Corp.</span></td><td>$57,126</td><td>2.4%</td><td><div class="prog-bar"><div class="prog-fill" style="width:7.5%;background:#3fb950"></div></div></td></tr>
+            <tr><td>5</td><td>Fiduciaria Bogotá S.A. (2)</td><td><span class="badge corp">Corp.</span></td><td>$49,440</td><td>2.0%</td><td><div class="prog-bar"><div class="prog-fill" style="width:6.5%;background:#3fb950"></div></div></td></tr>
+            <tr><td>6</td><td>Comunicación Celular Comcel</td><td><span class="badge corp">Corp.</span></td><td>$48,089</td><td>2.0%</td><td><div class="prog-bar"><div class="prog-fill" style="width:6.3%;background:#3fb950"></div></div></td></tr>
+            <tr><td>7</td><td>Sistecredito S.A.S.</td><td><span class="badge corp">Corp.</span></td><td>$42,978</td><td>1.8%</td><td><div class="prog-bar"><div class="prog-fill" style="width:5.6%;background:#3fb950"></div></div></td></tr>
+            <tr><td>8</td><td>Amarilo S.A.S.</td><td><span class="badge corp">Corp.</span></td><td>$31,956</td><td>1.3%</td><td><div class="prog-bar"><div class="prog-fill" style="width:4.2%;background:#d29922"></div></div></td></tr>
+            <tr><td>9</td><td>Admin. e Inv. Comerciales</td><td><span class="badge corp">Corp.</span></td><td>$29,850</td><td>1.2%</td><td><div class="prog-bar"><div class="prog-fill" style="width:3.9%;background:#d29922"></div></div></td></tr>
+            <tr><td>10</td><td>Patrimonios Autónomos Fid.</td><td><span class="badge corp">Corp.</span></td><td>$24,776</td><td>1.0%</td><td><div class="prog-bar"><div class="prog-fill" style="width:3.2%;background:#d29922"></div></div></td></tr>
+            <tr><td>11</td><td>Centrales Eléctricas Nariño</td><td><span class="badge ofic">Ofic.</span></td><td>$21,752</td><td>0.9%</td><td><div class="prog-bar"><div class="prog-fill" style="width:2.8%;background:#d29922"></div></div></td></tr>
+            <tr><td>12</td><td>MAC Center Colombia</td><td><span class="badge corp">Corp.</span></td><td>$19,491</td><td>0.8%</td><td><div class="prog-bar"><div class="prog-fill" style="width:2.5%;background:#d29922"></div></div></td></tr>
+            <tr><td>13</td><td>Fiduciaria Popular Fiduciar</td><td><span class="badge corp">Corp.</span></td><td>$18,238</td><td>0.8%</td><td><div class="prog-bar"><div class="prog-fill" style="width:2.4%;background:#d29922"></div></div></td></tr>
+            <tr><td>14</td><td>Comfama</td><td><span class="badge corp">Corp.</span></td><td>$17,909</td><td>0.7%</td><td><div class="prog-bar"><div class="prog-fill" style="width:2.3%;background:#d29922"></div></div></td></tr>
+            <tr><td>15</td><td>Mondelez Colombia S.A.S.</td><td><span class="badge corp">Corp.</span></td><td>$17,048</td><td>0.7%</td><td><div class="prog-bar"><div class="prog-fill" style="width:2.2%;background:#d29922"></div></div></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Concentración de comisiones <span>% acum.</span></div>
+        <div style="position:relative;height:200px"><canvas id="ch-concentracion"></canvas></div>
+        <div style="margin-top:12px;font-size:11px;color:var(--text3);line-height:1.6">Top 2 empresas (EPS Sanitas + Mercadopago) concentran el <strong style="color:#f85149">47.4%</strong> de las comisiones totales. Riesgo de concentración alto que amerita diversificación activa.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAESTRO ===== -->
+  <div class="page" id="page-maestro">
+    <div class="section-title">Marco completo de KPIs económicos — Cash Management BdB 2023–2025</div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Indicador</th><th>Familia</th><th>Fórmula</th><th>2023</th><th>2024</th><th>Var.</th><th>% Cambio</th><th>Interpretación</th></tr></thead>
+        <tbody>
+          <tr><td><strong>ROA depósitos</strong></td><td><span class="badge corp">Rentabilidad</span></td><td style="font-family:monospace;font-size:11px">Com/Saldo_dep</td><td>8.44%</td><td>9.12%</td><td class="up">↑+68pb</td><td class="up">+8.1%</td><td style="color:var(--text2)">Rendimiento sobre depósitos captados por cash</td></tr>
+          <tr><td><strong>Return on Relationship</strong></td><td><span class="badge pyme">Relación</span></td><td style="font-family:monospace;font-size:11px">(Com+FTP)/(Dep+Cart)</td><td>4.02%</td><td>4.46%</td><td class="up">↑+44pb</td><td class="up">+10.9%</td><td style="color:var(--text2)">Valor total de la relación banco-empresa</td></tr>
+          <tr><td><strong>Índice fondeo vital</strong></td><td><span class="badge emp">Fondeo</span></td><td style="font-family:monospace;font-size:11px">Dep_cash/Dep_total</td><td>34.2%</td><td>41.7%</td><td class="up">↑+7.5pp</td><td class="up">+21.9%</td><td style="color:var(--text2)">Fracción del fondeo de bajo costo captado</td></tr>
+          <tr><td><strong>MC / empresa</strong></td><td><span class="badge corp">Rentabilidad</span></td><td style="font-family:monospace;font-size:11px">MC_total/N_empresas</td><td>$179K</td><td>$199K</td><td class="up">↑+$20K</td><td class="up">+11.2%</td><td style="color:var(--text2)">Rentabilidad directa promedio por cliente</td></tr>
+          <tr><td><strong>Velocidad transaccional</strong></td><td><span class="badge ofic">Eficiencia</span></td><td style="font-family:monospace;font-size:11px">Flujos/Saldo_prom</td><td>3.95x</td><td>8.62x</td><td class="up">↑+4.67x</td><td class="up">+118.2%</td><td style="color:var(--text2)">Intensidad de uso de servicios cash (MV=PQ)</td></tr>
+          <tr><td><strong>Días de permanencia</strong></td><td><span class="badge emp">Fondeo</span></td><td style="font-family:monospace;font-size:11px">Saldo×365/Flujos</td><td>~92d</td><td>~42d</td><td class="dn">↓−50d</td><td class="dn">−54.3%</td><td style="color:var(--text2)">Mayor rotación 2024 por activación de negocios</td></tr>
+          <tr><td><strong>TCAC comisiones</strong></td><td><span class="badge corp">Rentabilidad</span></td><td style="font-family:monospace;font-size:11px">(Ct/C0)^(1/n)−1</td><td>base</td><td>+12.0%</td><td class="up">↑+12%</td><td class="up">+18.7% proy.</td><td style="color:var(--text2)">Crecimiento compuesto anual de la rentabilidad</td></tr>
+          <tr><td><strong>Coeficiente retención</strong></td><td><span class="badge pyme">Reciprocidad</span></td><td style="font-family:monospace;font-size:11px">Saldo_prom/Flujo_ent</td><td>0.253</td><td>0.116</td><td class="dn">↓−0.14</td><td class="dn">−54.2%</td><td style="color:var(--text2)">Fracción del flujo que permanece como saldo</td></tr>
+          <tr><td><strong>Índice de penetración</strong></td><td><span class="badge ofic">Eficiencia</span></td><td style="font-family:monospace;font-size:11px">Negocios/Empresas</td><td>2.24x</td><td>2.81x</td><td class="up">↑+0.57x</td><td class="up">+25.4%</td><td style="color:var(--text2)">Profundidad promedio de productos por cliente</td></tr>
+          <tr><td><strong>Elasticidad neg-flujo</strong></td><td><span class="badge ofic">Eficiencia</span></td><td style="font-family:monospace;font-size:11px">Δ%Flujos/Δ%Negocios</td><td>—</td><td>1.35x</td><td class="up">↑Positiva</td><td class="up">N/A</td><td style="color:var(--text2)">1% más negocios genera 1.35% más flujos</td></tr>
+          <tr><td><strong>Densidad transaccional</strong></td><td><span class="badge ofic">Eficiencia</span></td><td style="font-family:monospace;font-size:11px">ΣFlujos/N_empresas</td><td>$493M</td><td>$1.209B</td><td class="up">↑+$716M</td><td class="up">+145.2%</td><td style="color:var(--text2)">Flujo entrada promedio por empresa activa</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Crecimiento KPIs clave 2023→2024 <span>%</span></div>
+        <div style="position:relative;height:220px"><canvas id="ch-kpi-growth"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Radar desempeño multidimensional</div>
+        <div style="position:relative;height:220px"><canvas id="ch-radar2"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Matriz rentabilidad — Comisiones vs Flujos por segmento 2024 <span>Tamaño burbuja = empresas captadas</span></div>
+      <div style="position:relative;height:220px"><canvas id="ch-matrix"></canvas></div>
+    </div>
+  </div>
+
+  </div><!-- end content -->
+  <div class="footer">
+    <span>Dashboard Cash Management · Banco de Bogotá · Análisis 2023–2025</span>
+    <span>Vicepresidencia Banca Empresas · bases_proyecto_bdb.xlsx · cosechas_2325.xlsx</span>
+  </div>
+</div><!-- end main -->
+</div><!-- end shell -->
+
+<script>
+/* ===== DATA ===== */
+const MONTHS=['Ene-23','Feb-23','Mar-23','Abr-23','May-23','Jun-23','Jul-23','Ago-23','Sep-23','Oct-23','Nov-23','Dic-23','Ene-24','Feb-24','Mar-24','Abr-24','May-24','Jun-24','Jul-24','Ago-24','Sep-24','Oct-24','Nov-24','Dic-24','Ene-25','Feb-25','Mar-25','Abr-25','May-25'];
+
+const FE_ALL={
+  Corporativo:[159000000,154000000,165000000,143000000,164000000,178000000,167000000,161000000,171000000,191000000,167000000,205000000,213000000,172000000,197000000,281000000,278000000,163000000,313000000,240000000,242000000,284000000,226000000,453000000,226000000,235000000,224000000,249000000,229000000],
+  Empresarial:[8900000,8700000,9300000,8100000,9300000,10100000,9400000,9100000,9700000,10800000,9400000,11500000,12000000,9700000,11100000,15800000,15600000,9200000,17600000,13500000,13600000,16000000,12700000,25500000,12700000,13200000,12600000,14000000,12900000],
+  Oficial:[18100630,17908217,18847060,17078989,18582032,21394045,19293882,19198440,20653116,23094764,19599041,23785630,26034649,20851948,23999748,34140088,33721696,19628754,37979022,29260574,29565940,34613498,27045073,53803842,27461244,29259609,27795785,30618261,27901621]
+};
+const FS_ALL={
+  Corporativo:[144900000,139900000,149800000,130200000,149400000,161600000,151900000,146500000,155700000,173800000,151900000,186500000,194000000,156600000,179400000,255900000,253500000,148700000,285500000,218800000,220700000,259000000,206000000,412600000,206000000,214200000,204100000,227000000,208700000],
+  Empresarial:[7500000,7300000,7800000,6800000,7800000,8500000,7900000,7700000,8200000,9100000,7900000,9700000,10100000,8200000,9300000,13300000,13100000,7700000,14800000,11300000,11400000,13400000,10600000,21300000,10600000,11000000,10500000,11600000,10800000],
+  Oficial:[17500000,17300000,18200000,16500000,17900000,20600000,18600000,18500000,19900000,22300000,18900000,22900000,25100000,20100000,23100000,32900000,32400000,18800000,36400000,28000000,28300000,33100000,25900000,51300000,26200000,27900000,26500000,29100000,26600000]
+};
+const CS_ALL={
+  Corporativo:[63000,58900,64900,61100,60200,59800,61000,58700,62100,64200,64500,63600,66800,65700,67700,70500,72600,66700,78300,74200,71100,75100,73900,72000,86200,87100,84300,98000,94500],
+  Empresarial:[8500,7800,8700,8100,7900,7800,7700,7800,8100,8500,8300,8200,8900,8700,9100,9300,9800,8900,10300,9800,9500,10200,9600,9500,9800,9800,9500,10900,10200],
+  Oficial:[4188,3746,3726,3673,3809,3893,3900,3600,4100,4100,4300,4100,4423,4100,4400,4700,4900,4500,5600,5100,4800,4800,5200,4800,5234,5200,4900,5500,5300]
+};
+const SCC_ALL={
+  Corporativo:[50754745,50754745,50754745,50754745,50754745,50754745,50754745,50754745,50754745,50754745,50754745,50754745,27894745,27894745,27894745,27894745,27894745,27894745,27894745,27894745,27894745,27894745,27894745,27894745,11296885,11296885,11296885,11296885,11296885],
+  Empresarial:[21147810,21147810,21147810,21147810,21147810,21147810,21147810,21147810,21147810,21147810,21147810,21147810,11622810,11622810,11622810,11622810,11622810,11622810,11622810,11622810,11622810,11622810,11622810,11622810,4707035,4707035,4707035,4707035,4707035],
+  Oficial:[12688686,12688686,12688686,12688686,12688686,12688686,12688686,12688686,12688686,12688686,12688686,12688686,6973686,6973686,6973686,6973686,6973686,6973686,6973686,6973686,6973686,6973686,6973686,6973686,2824220,2824220,2824220,2824220,2824220]
+};
+const SCA_ALL={
+  Corporativo:[32499579,32499579,32499579,32499579,32499579,32499579,32499579,32499579,32499579,32499579,32499579,32499579,30657883,30657883,30657883,30657883,30657883,30657883,30657883,30657883,30657883,30657883,30657883,30657883,13302005,13302005,13302005,13302005,13302005],
+  Empresarial:[13541491,13541491,13541491,13541491,13541491,13541491,13541491,13541491,13541491,13541491,13541491,13541491,12774117,12774117,12774117,12774117,12774117,12774117,12774117,12774117,12774117,12774117,12774117,12774117,5542502,5542502,5542502,5542502,5542502],
+  Oficial:[8124894,8124894,8124894,8124894,8124894,8124894,8124894,8124894,8124894,8124894,8124894,8124894,7664472,7664472,7664472,7664472,7664472,7664472,7664472,7664472,7664472,7664472,7664472,7664472,3325501,3325501,3325501,3325501,3325501]
+};
+
+/* ===== HELPERS ===== */
+const ALL_SEGS=['Corporativo','Empresarial','Oficial'];
+const SEG_COLORS={Corporativo:'#58a6ff',Empresarial:'#3fb950',Oficial:'#d29922'};
+const SEG_BG={Corporativo:'rgba(88,166,255,.7)',Empresarial:'rgba(63,185,80,.7)',Oficial:'rgba(210,153,34,.7)'};
+
+function arrSum(a){return a.reduce((x,y)=>x+y,0);}
+function sumSeg(obj,segs){return MONTHS.map((_,i)=>segs.reduce((a,s)=>a+(obj[s]?obj[s][i]:0),0));}
+function fmt(v){
+  if(v>=1e9) return '$'+(v/1e9).toFixed(1)+'B';
+  if(v>=1e6) return '$'+(v/1e6).toFixed(1)+'M';
+  if(v>=1e3) return '$'+(v/1e3).toFixed(0)+'K';
+  return v.toFixed(2);
+}
+
+/* ===== STATE ===== */
+let activeSeg='Todos';
+let currentPage='overview';
+
+function getSegs(){return activeSeg==='Todos'?ALL_SEGS:[activeSeg];}
+function getFE(){return sumSeg(FE_ALL,getSegs());}
+function getFS(){return sumSeg(FS_ALL,getSegs());}
+function getCS(){return sumSeg(CS_ALL,getSegs());}
+function getSCC(){return sumSeg(SCC_ALL,getSegs());}
+function getSCA(){return sumSeg(SCA_ALL,getSegs());}
+
+/* ===== NAVIGATION ===== */
+const PAGE_TITLES={
+  overview:'Visión general del portafolio',
+  rentabilidad:'Análisis de rentabilidad',
+  cosechas:'Negocios ganados — Cosechas 2023–2025',
+  reciprocidad:'Reciprocidad y saldos',
+  roa:'KPI: ROA de depósitos',
+  ror:'KPI: Return on Relationship',
+  fondeo:'KPI: Índice de fondeo vital',
+  velocidad:'KPI: Velocidad del dinero',
+  clientes:'Top clientes del portafolio',
+  maestro:'Cuadro maestro de KPIs'
+};
+
+function goTo(id,el){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('page-title').textContent=PAGE_TITLES[id]||id;
+  currentPage=id;
+  destroyAll();
+  refreshPage(id);
+}
+
+/* ===== SEGMENT FILTER ===== */
+function setSeg(seg,el){
+  activeSeg=seg;
+  document.querySelectorAll('.seg-pill').forEach(function(p){p.classList.remove('on');});
+  el.classList.add('on');
+  var ind=document.getElementById('seg-indicator');
+  if(seg==='Todos'){
+    ind.classList.remove('show');
+  } else {
+    ind.textContent='Mostrando: '+seg;
+    ind.classList.add('show');
+  }
+  destroyAll();
+  refreshPage(currentPage);
+}
+
+/* ===== CHART REGISTRY ===== */
+var CI={};
+function destroyAll(){
+  Object.keys(CI).forEach(function(k){
+    if(CI[k]){try{CI[k].destroy();}catch(e){}}
+    delete CI[k];
+  });
+}
+function mk(id,cfg){
+  if(CI[id]){try{CI[id].destroy();}catch(e){}}
+  var el=document.getElementById(id);
+  if(!el)return;
+  CI[id]=new Chart(el,cfg);
+}
+
+/* ===== CHART DEFAULTS ===== */
+var baseOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},animation:{duration:500}};
+
+function xT(){
+  return {
+    ticks:{font:{size:9},maxRotation:45,autoSkip:false,color:'#8b949e'},
+    grid:{color:'rgba(48,54,61,.8)'}
+  };
+}
+function yT(cb){
+  return {
+    ticks:{font:{size:9},color:'#8b949e',callback:cb||function(v){return fmt(v);}},
+    grid:{color:'rgba(48,54,61,.8)'}
+  };
+}
+
+/* ===== KPI CARDS ===== */
+function buildKPI(containerId,cards){
+  var el=document.getElementById(containerId);
+  if(!el)return;
+  el.innerHTML=cards.map(function(c){
+    return '<div class="kpi">'
+      +'<div class="kpi-lbl">'+c.lbl+'</div>'
+      +'<div class="kpi-val">'+c.val+'</div>'
+      +'<div class="kpi-footer"><span class="'+(c.dir||'neutral')+'">'+( c.delta||'')+'</span>'+(c.sub?'<span class="neutral">'+c.sub+'</span>':'')+'</div>'
+      +'<div class="kpi-bar"><div class="kpi-fill" style="width:'+(c.w||50)+'%;background:'+(c.color||'var(--blue)')+'"></div></div>'
+      +'</div>';
+  }).join('');
+}
+
+/* ===== PAGE REFRESH ===== */
+function refreshPage(id){
+  var segs=getSegs();
+  var fe=getFE(), fs=getFS(), cs=getCS(), scc=getSCC(), sca=getSCA();
+  var fn=fe.map(function(v,i){return v-fs[i];});
+  var roa=cs.map(function(c,i){var d=sca[i]+scc[i];return d>0?parseFloat((c/d*100).toFixed(4)):0;});
+  var vel=fe.map(function(f,i){var d=sca[i]+scc[i];return d>0?parseFloat((f/d).toFixed(3)):0;});
+  var ret=fe.map(function(f,i){var d=sca[i]+scc[i];return f>0?parseFloat((d/f).toFixed(4)):0;});
+
+  var fe23=arrSum(fe.slice(0,12)), fe24=arrSum(fe.slice(12,24)), fe25=arrSum(fe.slice(24));
+  var cs23=arrSum(cs.slice(0,12)), cs24=arrSum(cs.slice(12,24)), cs25=arrSum(cs.slice(24));
+  var scc23=arrSum(scc.slice(0,12))/12, sca23=arrSum(sca.slice(0,12))/12;
+  var scc24=arrSum(scc.slice(12,24))/12, sca24=arrSum(sca.slice(12,24))/12;
+  var scc25=arrSum(scc.slice(24))/scc.slice(24).length, sca25=arrSum(sca.slice(24))/sca.slice(24).length;
+
+  var segLabel=activeSeg==='Todos'?'todos los segmentos':activeSeg;
+
+  /* ---- OVERVIEW ---- */
+  if(id==='overview'){
+    buildKPI('kpi-overview',[
+      {lbl:'Comisiones totales',val:fmt(cs23+cs24+cs25),delta:'↑ +'+((cs24/cs23-1)*100).toFixed(1)+'%',dir:'up',sub:'2023→2024',w:68,color:'var(--blue)'},
+      {lbl:'Flujos entrada acum.',val:fmt(fe23+fe24+fe25),delta:'↑ +'+((fe24/fe23-1)*100).toFixed(1)+'%',dir:'up',sub:'2023→2024',w:82,color:'var(--green)'},
+      {lbl:'Flujo neto acum.',val:fmt(arrSum(fn)),delta:'↑ Positivo',dir:'up',w:60,color:'var(--amber)'},
+      {lbl:'Saldo prom. dep. 2024',val:fmt(scc24+sca24),delta:((( scc24+sca24)/(scc23+sca23)-1)*100).toFixed(1)+'%',dir:(scc24+sca24)>=(scc23+sca23)?'up':'dn',sub:'vs 2023',w:50,color:'var(--purple)'}
+    ]);
+    var lbl=document.getElementById('lbl-fe-time');
+    if(lbl) lbl.textContent=segLabel+' · MM COP';
+
+    mk('ch-fe-time',{type:'line',data:{labels:MONTHS,datasets:[
+      {label:'Flujos entrada',data:fe,borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.06)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5},
+      {label:'Flujos salida',data:fs,borderColor:'#f85149',backgroundColor:'rgba(248,81,73,.04)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5},
+      {label:'Flujo neto',data:fn,borderColor:'#3fb950',backgroundColor:'rgba(63,185,80,.04)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5,borderDash:[4,3]}
+    ]},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){return c.dataset.label+': '+fmt(c.parsed.y);}}}},
+      scales:{x:xT(),y:yT()}
+    })});
+
+    mk('ch-donut',{type:'doughnut',data:{
+      labels:['Corporativo','Empresarial','Oficial'],
+      datasets:[{data:[5059,5884,2819],backgroundColor:['#58a6ff','#3fb950','#d29922'],borderWidth:0,hoverOffset:4}]
+    },options:Object.assign({},baseOpts,{
+      cutout:'68%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.parsed.toLocaleString()+' ('+((c.parsed/13762)*100).toFixed(1)+'%)';}}}},
+      animation:{duration:500}
+    })});
+
+    var csYr={Corporativo:[774460,859548,467693],Empresarial:[81242,101049,43628],Oficial:[38124,40857,15095]};
+    mk('ch-com-seg',{type:'bar',data:{labels:['2023','2024','2025(ytd)'],datasets:segs.map(function(s){
+      return {label:s,data:csYr[s],backgroundColor:SEG_BG[s],borderRadius:3,barPercentage:.65};
+    })},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
+        var all=ALL_SEGS.reduce(function(a,s){return a+csYr[s][c.dataIndex];},0);
+        return c.dataset.label+': '+fmt(c.parsed.y)+' · '+((c.parsed.y/all)*100).toFixed(1)+'% total';
+      }}}},
+      scales:{x:xT(),y:yT()}
+    })});
+
+    var feYr={Corporativo:[1909429331,5362426250,1137159553],Empresarial:[112862853,125532506,56113242],Oficial:[558046269,598125254,178562725]};
+    mk('ch-fe-seg',{type:'bar',data:{labels:['2023','2024','2025(ytd)'],datasets:segs.map(function(s){
+      return {label:s,data:feYr[s],backgroundColor:SEG_BG[s],borderRadius:3,barPercentage:.65};
+    })},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
+        var all=ALL_SEGS.reduce(function(a,s){return a+feYr[s][c.dataIndex];},0);
+        return c.dataset.label+': '+fmt(c.parsed.y)+' · '+((c.parsed.y/all)*100).toFixed(1)+'% total';
+      }}}},
+      scales:{x:xT(),y:yT()}
+    })});
+
+    var negTotals=[4534,6574,2869];
+    mk('ch-neg-yr',{type:'bar',data:{labels:['2023','2024','2025(ytd)'],datasets:[{
+      data:negTotals,
+      backgroundColor:['rgba(188,140,255,.6)','#bc8cff','rgba(188,140,255,.45)'],borderRadius:4
+    }]},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){
+        var prev=c.dataIndex>0?negTotals[c.dataIndex-1]:null;
+        var chg=prev?' · '+((c.parsed.y/prev-1)*100).toFixed(1)+'% vs anterior':'';
+        return 'Negocios: '+c.parsed.y.toLocaleString()+chg;
+      }}}},
+      scales:{x:xT(),y:yT(function(v){return v.toLocaleString();})}
+    })});
+
+    mk('ch-com-seg-monthly',{type:'line',data:{labels:MONTHS,datasets:segs.map(function(s){
+      return {label:s,data:CS_ALL[s],borderColor:SEG_COLORS[s],tension:.4,pointRadius:0,borderWidth:1.5};
+    })},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
+        var tot=segs.reduce(function(a,s){return a+(CS_ALL[s][c.dataIndex]||0);},0);
+        return c.dataset.label+': '+fmt(c.parsed.y)+' · '+((c.parsed.y/tot)*100).toFixed(0)+'%';
+      }}}},
+      scales:{x:xT(),y:yT()}
+    })});
+  }
+
+  /* ---- RENTABILIDAD ---- */
+  if(id==='rentabilidad'){
+    buildKPI('kpi-rentabilidad',[
+      {lbl:'Comisiones 2023',val:fmt(cs23),delta:'Año base',dir:'neutral',w:58,color:'var(--blue)'},
+      {lbl:'Comisiones 2024',val:fmt(cs24),delta:'↑ +'+((cs24/cs23-1)*100).toFixed(1)+'%',dir:'up',w:65,color:'var(--blue)'},
+      {lbl:'Comisiones 2025 (5m)',val:fmt(cs25),delta:'↑ proy. '+fmt(cs25/5*12),dir:'up',w:82,color:'var(--blue)'},
+      {lbl:'TCAC comisiones',val:'+18.7%',delta:'↑ Compuesto anual',dir:'up',w:74,color:'var(--green)'}
+    ]);
+    var lbl2=document.getElementById('lbl-rent');
+    if(lbl2) lbl2.textContent=segLabel+' · COP';
+
+    mk('ch-rent-monthly',{type:'line',data:{labels:MONTHS,datasets:segs.map(function(s){
+      return {label:s,data:CS_ALL[s],borderColor:SEG_COLORS[s],tension:.4,pointRadius:0,borderWidth:1.5};
+    })},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
+        var tot=segs.reduce(function(a,s){return a+(CS_ALL[s][c.dataIndex]||0);},0);
+        return c.dataset.label+': '+fmt(c.parsed.y)+' · '+((c.parsed.y/tot)*100).toFixed(0)+'%';
+      }}}},
+      scales:{x:xT(),y:yT()}
+    })});
+
+    var csYrR={Corporativo:[774460,859548,467693],Empresarial:[81242,101049,43628],Oficial:[38124,40857,15095]};
+    var allCom24=ALL_SEGS.reduce(function(a,s){return a+csYrR[s][1];},0);
+    mk('ch-rent-pie',{type:'doughnut',data:{
+      labels:['Corp. 85.8%','Emp. 10.1%','Ofic. 4.1%'],
+      datasets:[{data:segs.map(function(s){return csYrR[s][1];}),backgroundColor:segs.map(function(s){return SEG_COLORS[s];}),borderWidth:0,hoverOffset:4}]
+    },options:Object.assign({},baseOpts,{
+      cutout:'65%',
+      plugins:{legend:{position:'right',labels:{color:'#8b949e',font:{size:10},boxWidth:9,padding:6}},tooltip:{callbacks:{label:function(c){
+        return c.label+': '+fmt(c.parsed)+' ('+((c.parsed/allCom24)*100).toFixed(1)+'%)';
+      }}}}
+    })});
+
+    var feByYr=[arrSum(fe.slice(0,12)),arrSum(fe.slice(12,24)),arrSum(fe.slice(24))];
+    var fsByYr=[arrSum(fs.slice(0,12)),arrSum(fs.slice(12,24)),arrSum(fs.slice(24))];
+    mk('ch-flujo-neto',{type:'bar',data:{labels:['2023','2024','2025(ytd)'],datasets:[
+      {label:'Entrada',data:feByYr,backgroundColor:'rgba(88,166,255,.7)',borderRadius:3,barPercentage:.5},
+      {label:'Salida',data:fsByYr,backgroundColor:'rgba(248,81,73,.7)',borderRadius:3,barPercentage:.5}
+    ]},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
+        var net=feByYr[c.dataIndex]-fsByYr[c.dataIndex];
+        return c.dataset.label+': '+fmt(c.parsed.y)+' | Neto: '+fmt(net);
+      }}}},
+      scales:{x:xT(),y:yT()}
+    })});
+
+    var tb=document.getElementById('tb-rent');
+    if(tb){
+      var csYrMap={Corporativo:[774460,859548,467693],Empresarial:[81242,101049,43628],Oficial:[38124,40857,15095]};
+      var totAll=ALL_SEGS.reduce(function(a,s){return a+csYrMap[s][1];},0);
+      tb.innerHTML=segs.map(function(s){
+        var d=csYrMap[s];
+        var v=((d[1]/d[0]-1)*100).toFixed(1);
+        var part=((d[1]/totAll)*100).toFixed(1);
+        var badge=s==='Corporativo'?'corp':s==='Empresarial'?'emp':'ofic';
+        return '<tr><td><span class="badge '+badge+'">'+s+'</span></td>'
+          +'<td>$'+d[0].toLocaleString()+'</td><td>$'+d[1].toLocaleString()+'</td><td>$'+d[2].toLocaleString()+'</td>'
+          +'<td class="'+(parseFloat(v)>=0?'up':'dn')+'">'+(parseFloat(v)>=0?'↑':'↓')+Math.abs(v)+'%</td>'
+          +'<td style="color:'+SEG_COLORS[s]+';font-weight:600">'+part+'%</td></tr>';
+      }).join('');
+    }
+  }
+
+  /* ---- COSECHAS ---- */
+  if(id==='cosechas'){
+    var negBySeg={Corporativo:{2023:1778,2024:2308,2025:973},Empresarial:{2023:1761,2024:2881,2025:1237},Oficial:{2023:795,2024:1365,2025:659}};
+    var neg23=segs.reduce(function(a,s){return a+negBySeg[s][2023];},0);
+    var neg24=segs.reduce(function(a,s){return a+negBySeg[s][2024];},0);
+    var neg25=segs.reduce(function(a,s){return a+negBySeg[s][2025];},0);
+    buildKPI('kpi-cosechas',[
+      {lbl:'Negocios 2023',val:neg23.toLocaleString(),delta:'Año base',dir:'neutral',w:55,color:'var(--purple)'},
+      {lbl:'Negocios 2024',val:neg24.toLocaleString(),delta:'↑ +'+((neg24/neg23-1)*100).toFixed(1)+'%',dir:'up',w:80,color:'var(--purple)'},
+      {lbl:'Negocios 2025 (ytd)',val:neg25.toLocaleString(),delta:'↑ proy. ~'+Math.round(neg25/5*12).toLocaleString(),dir:'up',w:88,color:'var(--purple)'},
+      {lbl:'Empresas captadas',val:'5,175',delta:'Portafolio activo',dir:'neutral',w:63,color:'var(--green)'}
+    ]);
+
+    mk('ch-neg-seg',{type:'bar',data:{labels:['2023','2024','2025(ytd)'],datasets:segs.map(function(s){
+      return {label:s,data:[negBySeg[s][2023],negBySeg[s][2024],negBySeg[s][2025]],backgroundColor:SEG_BG[s],borderRadius:3,barPercentage:.65};
+    })},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
+        var allN=ALL_SEGS.reduce(function(a,s){return a+[negBySeg[s][2023],negBySeg[s][2024],negBySeg[s][2025]][c.dataIndex];},0);
+        return c.dataset.label+': '+c.parsed.y.toLocaleString()+' · '+((c.parsed.y/allN)*100).toFixed(1)+'% total';
+      }}}},
+      scales:{x:xT(),y:yT(function(v){return v.toLocaleString();})}
+    })});
+
+    var prodData=[3702,2416,1306,1008,706,512,412,402,399,355,289,270];
+    var prodTotal=prodData.reduce(function(a,b){return a+b;},0);
+    mk('ch-prod',{type:'bar',indexAxis:'y',data:{
+      labels:['Disfon','ACH Recibidas','T.Crédito','Adquirencia','Portal Corp.','Barras','Correspon.','SNR','T.Crédito v2','P.Negocios','Rotativo','Giros'],
+      datasets:[{data:prodData,backgroundColor:'rgba(188,140,255,.75)',borderRadius:2}]
+    },options:Object.assign({},baseOpts,{
+      indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){
+        return c.parsed.x.toLocaleString()+' negocios · '+((c.parsed.x/prodTotal)*100).toFixed(1)+'% del total';
+      }}}},
+      scales:{x:yT(function(v){return v.toLocaleString();}),y:{ticks:{font:{size:9},color:'#8b949e'},grid:{color:'rgba(48,54,61,.8)'}}}
+    })});
+
+    var empSeg={Corporativo:[779,930,479],Empresarial:[980,1489,804],Oficial:[408,567,293]};
+    mk('ch-emp-growth',{type:'line',data:{labels:['2023','2024','2025'],datasets:segs.map(function(s){
+      return {label:s,data:empSeg[s],borderColor:SEG_COLORS[s],backgroundColor:SEG_COLORS[s].replace('ff','14'),fill:true,tension:.4,pointRadius:4,borderWidth:2};
+    })},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
+        var tot=segs.reduce(function(a,s){return a+empSeg[s][c.dataIndex];},0);
+        return c.dataset.label+': '+c.parsed.y.toLocaleString()+' · '+((c.parsed.y/tot)*100).toFixed(1)+'%';
+      }}}},
+      scales:{x:xT(),y:yT(function(v){return v.toLocaleString();})}
+    })});
+  }
+
+  /* ---- RECIPROCIDAD ---- */
+  if(id==='reciprocidad'){
+    buildKPI('kpi-reciprocidad',[
+      {lbl:'Saldo prom. CC 2024',val:fmt(scc24),delta:((scc24/scc23-1)*100).toFixed(1)+'%',dir:scc24>=scc23?'up':'dn',sub:'vs 2023',w:55,color:'var(--blue)'},
+      {lbl:'Saldo prom. CA 2024',val:fmt(sca24),delta:((sca24/sca23-1)*100).toFixed(1)+'%',dir:sca24>=sca23?'up':'dn',sub:'vs 2023',w:60,color:'var(--green)'},
+      {lbl:'Coef. retención 2024',val:(arrSum(ret.slice(12,24))/12).toFixed(3),delta:'Saldo / Flujo entrada',dir:'neutral',w:30,color:'var(--amber)'},
+      {lbl:'Índice penetración',val:'2.70x',delta:'↑ +25%',dir:'up',sub:'2023→2024',w:68,color:'var(--purple)'}
+    ]);
+
+    mk('ch-recip-dual',{type:'line',data:{labels:MONTHS,datasets:[
+      {label:'Flujos entrada',data:fe,borderColor:'#58a6ff',tension:.4,pointRadius:0,borderWidth:1.5,yAxisID:'y'},
+      {label:'Saldos CC+CA',data:scc.map(function(v,i){return v+sca[i];}),borderColor:'#3fb950',tension:.4,pointRadius:0,borderWidth:1.5,yAxisID:'y1'}
+    ]},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){return c.dataset.label+': '+fmt(c.parsed.y);}}}},
+      scales:{x:xT(),y:Object.assign(yT(),{position:'left'}),y1:Object.assign(yT(),{position:'right',grid:{drawOnChartArea:false}})}
+    })});
+
+    var s23=[arrSum(scc.slice(0,12))/12,arrSum(sca.slice(0,12))/12];
+    var s24=[arrSum(scc.slice(12,24))/12,arrSum(sca.slice(12,24))/12];
+    var s25=[arrSum(scc.slice(24))/scc.slice(24).length,arrSum(sca.slice(24))/sca.slice(24).length];
+    mk('ch-saldos-yr',{type:'bar',data:{labels:['2023','2024','2025'],datasets:[
+      {label:'Saldo CC',data:[s23[0],s24[0],s25[0]],backgroundColor:'rgba(88,166,255,.7)',borderRadius:3,barPercentage:.5},
+      {label:'Saldo CA',data:[s23[1],s24[1],s25[1]],backgroundColor:'rgba(63,185,80,.7)',borderRadius:3,barPercentage:.5}
+    ]},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:true,position:'top',labels:{color:'#8b949e',font:{size:10},boxWidth:9}},
+        tooltip:{mode:'index',callbacks:{label:function(c){
+          var tots=[s23[0]+s23[1],s24[0]+s24[1],s25[0]+s25[1]];
+          return c.dataset.label+': '+fmt(c.parsed.y)+' · '+((c.parsed.y/tots[c.dataIndex])*100).toFixed(1)+'% del saldo';
+        }}}},
+      scales:{x:xT(),y:yT()}
+    })});
+
+    mk('ch-retencion',{type:'line',data:{labels:MONTHS,datasets:[{
+      label:'Coef. retención',data:ret,borderColor:'#bc8cff',backgroundColor:'rgba(188,140,255,.07)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5
+    }]},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){
+        return 'Coef: '+c.parsed.y.toFixed(3)+' ('+( c.parsed.y*100).toFixed(1)+'% del flujo retenido)';
+      }}}},
+      scales:{x:xT(),y:yT(function(v){return v.toFixed(3);})}
+    })});
+  }
+
+  /* ---- ROA ---- */
+  if(id==='roa'){
+    var roa23avg=arrSum(roa.slice(0,12))/12;
+    var roa24avg=arrSum(roa.slice(12,24))/12;
+    buildKPI('kpi-roa',[
+      {lbl:'ROA depósitos 2023',val:roa23avg.toFixed(3)+'%',delta:'Comisiones / Saldo dep. prom.',dir:'neutral',w:56,color:'var(--blue)'},
+      {lbl:'ROA depósitos 2024',val:roa24avg.toFixed(3)+'%',delta:'↑ +'+(((roa24avg-roa23avg)*1000).toFixed(0))+' pbs',dir:'up',w:61,color:'var(--blue)'},
+      {lbl:'Benchmark BdB (oct-2023)',val:'8.99%',delta:'FTP / Prom. depósitos',dir:'neutral',w:60,color:'var(--green)'}
+    ]);
+
+    mk('ch-roa-monthly',{type:'line',data:{labels:MONTHS,datasets:[{
+      label:'ROA dep.',data:roa,borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.07)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5
+    }]},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){
+        return 'ROA: '+c.parsed.y.toFixed(4)+'% · '+((c.parsed.y/8.99)*100).toFixed(1)+'% del benchmark';
+      }}}},
+      scales:{x:xT(),y:yT(function(v){return v.toFixed(3)+'%';})}
+    })});
+
+    var roaSeg={Corporativo:[9.0,9.4,9.8],Empresarial:[7.8,8.1,8.4],Oficial:[7.2,7.6,7.9]};
+    mk('ch-roa-seg',{type:'bar',data:{labels:['2023','2024','2025'],datasets:segs.map(function(s){
+      return {label:s,data:roaSeg[s],backgroundColor:SEG_BG[s],borderRadius:3,barPercentage:.65};
+    })},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
+        return c.dataset.label+': '+c.parsed.y+'% · '+((c.parsed.y/8.99)*100).toFixed(1)+'% del benchmark';
+      }}}},
+      scales:{x:xT(),y:yT(function(v){return v+'%';})}
+    })});
+  }
+
+  /* ---- RoR ---- */
+  if(id==='ror'){
+    buildKPI('kpi-ror',[
+      {lbl:'RoR promedio 2023',val:'4.02%',delta:'Margen neto int. / (Act+Pas)',dir:'neutral',w:40,color:'var(--purple)'},
+      {lbl:'RoR promedio 2024',val:'4.46%',delta:'↑ +44 pbs',dir:'up',w:45,color:'var(--purple)'},
+      {lbl:'Referencia BdB oct-2023',val:'4.46%',delta:'Margen Fin. Neto / Cartera',dir:'neutral',w:45,color:'var(--green)'}
+    ]);
+
+    var rorSeg={Corporativo:[4.22,4.68,4.91],Empresarial:[3.41,3.88,4.02],Oficial:[3.15,3.44,3.51]};
+    mk('ch-ror-seg',{type:'bar',data:{labels:['2023','2024','2025'],datasets:segs.map(function(s){
+      return {label:s,data:rorSeg[s],backgroundColor:SEG_BG[s],borderRadius:3,barPercentage:.65};
+    })},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
+        return c.dataset.label+': '+c.parsed.y+'% · '+((c.parsed.y/4.46)*100).toFixed(1)+'% del ref. BdB';
+      }}}},
+      scales:{x:xT(),y:yT(function(v){return v+'%';})}
+    })});
+
+    var radarVals={Corporativo:[94,95,88,100,82,65],Empresarial:[81,82,72,7,55,85],Oficial:[76,73,68,8,62,45]};
+    mk('ch-radar',{type:'radar',data:{labels:['ROA dep.','RoR','Fondeo vital','MC/empresa','Velocidad','Penetración'],datasets:segs.map(function(s){
+      return {label:s,data:radarVals[s],borderColor:SEG_COLORS[s],backgroundColor:SEG_COLORS[s]+'20',pointBackgroundColor:SEG_COLORS[s],borderWidth:1.5};
+    })},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},
+      plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:9}},
+        tooltip:{callbacks:{label:function(c){return c.dataset.label+' — '+c.label+': '+c.parsed.r+'/100';}}},
+      },
+      scales:{r:{ticks:{font:{size:8},color:'#6e7681',backdropColor:'transparent'},pointLabels:{color:'#8b949e',font:{size:10}},grid:{color:'rgba(48,54,61,.8)'},angleLines:{color:'rgba(48,54,61,.8)'},min:0,max:100}}
+    }});
+  }
+
+  /* ---- FONDEO ---- */
+  if(id==='fondeo'){
+    buildKPI('kpi-fondeo',[
+      {lbl:'Índice fondeo vital 2023',val:'34.2%',delta:'Dep. transacc. / Dep. totales',dir:'neutral',w:34,color:'var(--green)'},
+      {lbl:'Índice fondeo vital 2024',val:'41.7%',delta:'↑ +7.5 pp vs 2023',dir:'up',w:42,color:'var(--green)'},
+      {lbl:'Costo implícito captación',val:'~1.8%',delta:'vs ~6.3% CDT · ahorro 4.5%',dir:'neutral',w:18,color:'var(--red)'}
+    ]);
+
+    mk('ch-fondeo-ev',{type:'bar',data:{labels:['2023','2024','2025(ytd)'],datasets:[
+      {label:'IFV (%)',data:[34.2,41.7,44.1],backgroundColor:'rgba(63,185,80,.75)',borderRadius:4,yAxisID:'y'},
+      {label:'Ahorro fondeo (MM)',data:[6200,8900,4100],backgroundColor:'rgba(88,166,255,.25)',borderRadius:4,yAxisID:'y1'}
+    ]},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:true,position:'top',labels:{color:'#8b949e',font:{size:10},boxWidth:9}},
+        tooltip:{mode:'index',callbacks:{label:function(c){
+          if(c.dataset.yAxisID==='y') return 'IFV: '+c.parsed.y+'% · +'+(c.parsed.y-34.2).toFixed(1)+'pp desde 2023';
+          return 'Ahorro fondeo: '+fmt(c.parsed.y);
+        }}}},
+      scales:{x:xT(),y:Object.assign(yT(function(v){return v+'%';}),{position:'left'}),y1:Object.assign(yT(),{position:'right',grid:{drawOnChartArea:false}})}
+    })});
+
+    mk('ch-saldos-monthly',{type:'line',data:{labels:MONTHS,datasets:[
+      {label:'Saldo CC',data:scc,borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.06)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5},
+      {label:'Saldo CA',data:sca,borderColor:'#3fb950',backgroundColor:'rgba(63,185,80,.06)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5}
+    ]},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:true,position:'top',labels:{color:'#8b949e',font:{size:10},boxWidth:9}},
+        tooltip:{mode:'index',callbacks:{label:function(c){
+          var tot=scc[c.dataIndex]+sca[c.dataIndex];
+          return c.dataset.label+': '+fmt(c.parsed.y)+' · '+((c.parsed.y/tot)*100).toFixed(1)+'% del total';
+        }}}},
+      scales:{x:xT(),y:yT()}
+    })});
+  }
+
+  /* ---- VELOCIDAD ---- */
+  if(id==='velocidad'){
+    var vel23avg=arrSum(vel.slice(0,12))/12;
+    var vel24avg=arrSum(vel.slice(12,24))/12;
+    buildKPI('kpi-velocidad',[
+      {lbl:'Velocidad transacc. 2023',val:vel23avg.toFixed(2)+'x',delta:'Flujos / Saldo prom. CC+CA',dir:'neutral',w:40,color:'var(--amber)'},
+      {lbl:'Velocidad transacc. 2024',val:vel24avg.toFixed(2)+'x',delta:'↑ +'+((vel24avg/vel23avg-1)*100).toFixed(0)+'% activación negocios',dir:'up',w:86,color:'var(--amber)'},
+      {lbl:'Días de permanencia prom.',val:'~42 días',delta:'Saldo × 365 / Flujos entrada',dir:'neutral',w:35,color:'var(--red)'}
+    ]);
+
+    mk('ch-velocidad',{type:'line',data:{labels:MONTHS,datasets:[{
+      label:'Velocidad',data:vel,borderColor:'#d29922',backgroundColor:'rgba(210,153,34,.07)',fill:true,tension:.4,pointRadius:0,borderWidth:2
+    }]},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){
+        var dias=c.parsed.y>0?Math.round(365/c.parsed.y):'—';
+        return 'Velocidad: '+c.parsed.y.toFixed(2)+'x · Días perm: ~'+dias+'d';
+      }}}},
+      scales:{x:xT(),y:yT(function(v){return v+'x';})}
+    })});
+
+    var velSeg={Corporativo:[4.1,9.2,9.8],Empresarial:[3.4,6.8,7.2],Oficial:[3.8,8.1,8.6]};
+    mk('ch-vel-seg',{type:'bar',data:{labels:['2023','2024','2025'],datasets:segs.map(function(s){
+      return {label:s,data:velSeg[s],backgroundColor:SEG_BG[s],borderRadius:3,barPercentage:.65};
+    })},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
+        var dias=c.parsed.y>0?Math.round(365/c.parsed.y):'—';
+        return c.dataset.label+': '+c.parsed.y+'x · ~'+dias+' días perm.';
+      }}}},
+      scales:{x:xT(),y:yT(function(v){return v+'x';})}
+    })});
+  }
+
+  /* ---- CLIENTES ---- */
+  if(id==='clientes'){
+    buildKPI('kpi-clientes',[
+      {lbl:'Comisión acum. top 1',val:'$764K',delta:'EPS Sanitas · 31.5% del total',dir:'neutral',w:100,color:'var(--blue)'},
+      {lbl:'Concentración top 3',val:'50.3%',delta:'↑ Riesgo concentración alto',dir:'dn',w:50,color:'var(--red)'},
+      {lbl:'Comisión prom. top 15',val:'$113K',delta:'Promedio por empresa',dir:'neutral',w:45,color:'var(--green)'}
+    ]);
+
+    var concData=[764074,355477,103443,57126,1143576];
+    var concTotal=concData.reduce(function(a,b){return a+b;},0);
+    mk('ch-concentracion',{type:'doughnut',data:{
+      labels:['EPS Sanitas 31.5%','Mercadopago 14.7%','Fid. Bogotá 4.3%','Terpel 2.4%','Resto 47.2%'],
+      datasets:[{data:concData,backgroundColor:['#58a6ff','#3fb950','#d29922','#bc8cff','#30363d'],borderWidth:0,hoverOffset:4}]
+    },options:Object.assign({},baseOpts,{
+      cutout:'62%',
+      plugins:{legend:{display:true,position:'right',labels:{color:'#8b949e',font:{size:9},boxWidth:9,padding:5}},
+        tooltip:{callbacks:{label:function(c){return c.label+': '+fmt(c.parsed)+' · '+((c.parsed/concTotal)*100).toFixed(1)+'%';}}}}
+    })});
+  }
+
+  /* ---- MAESTRO ---- */
+  if(id==='maestro'){
+    mk('ch-kpi-growth',{type:'bar',data:{labels:['Comisiones','Flujos entrada','Negocios gan.','Empresas cap.','ROA dep.','RoR'],datasets:[
+      {label:'2023→2024',data:[12.0,135.8,45.1,31.6,8.1,10.9],backgroundColor:'rgba(88,166,255,.8)',borderRadius:3,barPercentage:.5},
+      {label:'2024→2025p',data:[26.0,20.0,5.0,8.0,7.0,4.8],backgroundColor:'rgba(63,185,80,.7)',borderRadius:3,barPercentage:.5}
+    ]},options:Object.assign({},baseOpts,{
+      plugins:{legend:{display:true,position:'top',labels:{color:'#8b949e',font:{size:10},boxWidth:9}},
+        tooltip:{callbacks:{label:function(c){return c.dataset.label+' — '+c.label+': '+c.parsed.y+'%';}}}},
+      scales:{x:xT(),y:yT(function(v){return v+'%';})}
+    })});
+
+    var radarVals2={Corporativo:[94,95,88,100,82,65],Empresarial:[81,82,72,7,55,85],Oficial:[76,73,68,8,62,45]};
+    mk('ch-radar2',{type:'radar',data:{labels:['ROA dep.','RoR','Fondeo vital','MC/empresa','Velocidad','Penetración'],datasets:ALL_SEGS.map(function(s){
+      return {label:s,data:radarVals2[s],borderColor:SEG_COLORS[s],backgroundColor:SEG_COLORS[s]+'20',pointBackgroundColor:SEG_COLORS[s],borderWidth:1.5};
+    })},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},
+      plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:9}}},
+      scales:{r:{ticks:{font:{size:8},color:'#6e7681',backdropColor:'transparent'},pointLabels:{color:'#8b949e',font:{size:10}},grid:{color:'rgba(48,54,61,.8)'},angleLines:{color:'rgba(48,54,61,.8)'},min:0,max:100}}
+    }});
+
+    mk('ch-matrix',{type:'bubble',data:{datasets:ALL_SEGS.map(function(s){
+      var xv={Corporativo:5362,Empresarial:126,Oficial:598}[s];
+      var yv={Corporativo:860,Empresarial:101,Oficial:41}[s];
+      var rv={Corporativo:22,Empresarial:14,Oficial:10}[s];
+      return {label:s,data:[{x:xv,y:yv,r:rv}],backgroundColor:SEG_BG[s],borderColor:SEG_COLORS[s],borderWidth:1};
+    })},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},
+      plugins:{legend:{display:true,position:'top',labels:{color:'#8b949e',font:{size:10},boxWidth:9}},
+        tooltip:{callbacks:{label:function(c){
+          var totFe=5362+126+598, totCom=860+101+41;
+          return [c.dataset.label,'Flujos: $'+c.parsed.x+'M ('+((c.parsed.x/totFe)*100).toFixed(1)+'%)','Comisiones: $'+c.parsed.y+'K ('+((c.parsed.y/totCom)*100).toFixed(1)+'%)'];
+        }}}},
+      scales:{
+        x:Object.assign(yT(function(v){return '$'+v+'M';}),{title:{display:true,text:'Flujos de entrada (MM COP)',color:'#6e7681',font:{size:11}}}),
+        y:Object.assign(yT(function(v){return '$'+v+'K';}),{title:{display:true,text:'Comisiones (K COP)',color:'#6e7681',font:{size:11}}})
+      }
+    }});
+  }
+}
+
+/* ===== INIT ===== */
+window.addEventListener('load',function(){setTimeout(function(){refreshPage('overview');},100);});
+</script>
+</body>
+</html>
