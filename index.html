@@ -1,1096 +1,261 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Cash Management — Banco de Bogotá 2023–2025</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Cash Management BdB · Tablero de Rentabilidad 2023–2025</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#0d1117;--bg2:#161b22;--bg3:#1c2433;--bg4:#21262d;
-  --border:#30363d;--border2:#444c56;
-  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
-  --blue:#58a6ff;--blue-dim:rgba(88,166,255,.15);
-  --green:#3fb950;--green-dim:rgba(63,185,80,.15);
-  --amber:#d29922;--amber-dim:rgba(210,153,34,.15);
-  --red:#f85149;--red-dim:rgba(248,81,73,.15);
-  --purple:#bc8cff;--purple-dim:rgba(188,140,255,.15);
-  --r:8px;--r2:12px;
-}
-html,body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;min-height:100vh;}
-strong{font-weight:500;}
-.shell{display:flex;min-height:100vh;}
-.sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto;}
-.sidebar-logo{padding:20px 16px 12px;border-bottom:1px solid var(--border);}
-.logo-mark{width:28px;height:28px;background:var(--blue);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:#fff;margin-right:8px;vertical-align:middle;}
-.logo-text{font-size:13px;font-weight:500;color:var(--text);vertical-align:middle;}
-.logo-sub{font-size:10px;color:var(--text2);margin-top:4px;padding-left:36px;}
-.sidebar-section{padding:12px 8px 4px;}
-.sidebar-section-label{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:0 8px;margin-bottom:4px;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;border:none;background:transparent;width:100%;text-align:left;}
-.nav-item:hover{background:var(--bg3);color:var(--text);}
-.nav-item.active{background:var(--blue-dim);color:var(--blue);}
-.nav-icon{width:16px;height:16px;opacity:.7;flex-shrink:0;}
-.nav-badge{margin-left:auto;background:var(--bg4);color:var(--text2);font-size:10px;padding:1px 6px;border-radius:20px;}
-.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
-.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;flex-wrap:wrap;gap:8px;}
-.topbar-left{display:flex;flex-direction:column;}
-.topbar-title{font-size:15px;font-weight:500;color:var(--text);}
-.topbar-sub{font-size:11px;color:var(--text2);margin-top:2px;}
-.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.seg-pill{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;}
-.seg-pill:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
-.seg-pill.on{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);font-weight:600;}
-.seg-pill.corp.on{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
-.seg-pill.emp.on{border-color:var(--green);color:var(--green);background:var(--green-dim);}
-.seg-pill.ofic.on{border-color:var(--amber);color:var(--amber);background:var(--amber-dim);}
-.seg-indicator{font-size:11px;color:var(--text3);padding:4px 10px;border-radius:6px;background:var(--bg4);display:none;}
-.seg-indicator.show{display:inline-block;}
-.content{padding:20px 24px;flex:1;}
-.page{display:none;}.page.active{display:block;}
-.kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px;}
-.kpi-row-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:20px;}
-.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px 18px;transition:border-color .2s;}
-.kpi-lbl{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
-.kpi-val{font-size:26px;font-weight:600;color:var(--text);line-height:1;font-family:'IBM Plex Mono',monospace;}
-.kpi-footer{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;}
-.up{color:var(--green);font-weight:500;}.dn{color:var(--red);font-weight:500;}.neutral{color:var(--text2);}
-.kpi-bar{height:3px;background:var(--bg4);border-radius:2px;margin-top:10px;overflow:hidden;}
-.kpi-fill{height:100%;border-radius:2px;transition:width .6s ease;}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
-.grid-7030{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
-.grid-3070{display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-bottom:16px;}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px;margin-bottom:0;}
-.card-title{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
-.card-title span{color:var(--text3);font-weight:400;font-size:10px;text-transform:none;letter-spacing:0;}
-.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:10px;}
-.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
-.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
-.table-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;}
-th{text-align:left;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;padding:8px 12px;border-bottom:1px solid var(--border);white-space:nowrap;}
-td{padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text);}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:var(--bg3);}
-.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;}
-.corp{background:var(--blue-dim);color:var(--blue);}
-.emp{background:var(--green-dim);color:var(--green);}
-.ofic{background:var(--amber-dim);color:var(--amber);}
-.pyme{background:var(--purple-dim);color:var(--purple);}
-.section-title{font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
-.formula{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:0 var(--r) var(--r) 0;padding:10px 14px;margin:8px 0;font-size:12px;font-family:'IBM Plex Mono',monospace;}
-.formula small{display:block;font-family:'IBM Plex Sans',sans-serif;font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
-.prog-row{margin-bottom:10px;}
-.prog-head{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;color:var(--text2);}
-.prog-head strong{color:var(--text);font-weight:500;}
-.prog-bar{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;}
-.prog-fill{height:100%;border-radius:3px;transition:width .8s ease;}
-.info-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
-.info-row:last-child{border-bottom:none;}
-.info-name{font-size:12px;font-weight:500;color:var(--text);}
-.info-sub{font-size:11px;color:var(--text2);}
-.info-val{font-size:16px;font-weight:600;font-family:'IBM Plex Mono',monospace;text-align:right;}
-.chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;margin-left:6px;}
-.chip-ok{background:var(--green-dim);color:var(--green);}
-.chip-warn{background:var(--amber-dim);color:var(--amber);}
-.chip-risk{background:var(--red-dim);color:var(--red);}
-::-webkit-scrollbar{width:6px;height:6px;}
-::-webkit-scrollbar-track{background:var(--bg2);}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
-.footer{background:var(--bg2);border-top:1px solid var(--border);padding:12px 24px;font-size:11px;color:var(--text3);display:flex;justify-content:space-between;}
-@media(max-width:1200px){.kpi-row{grid-template-columns:repeat(2,1fr);}.grid2,.grid-7030,.grid-3070{grid-template-columns:1fr;}}
-</style>
-</head>
-<body>
-<div class="shell">
-
-<nav class="sidebar">
-  <div class="sidebar-logo">
-    <span class="logo-mark">B</span>
-    <span class="logo-text">Banco de Bogotá</span>
-    <div class="logo-sub">Cash Management Analytics</div>
-  </div>
-  <div class="sidebar-section">
-    <div class="sidebar-section-label">Análisis</div>
-    <button class="nav-item active" onclick="goTo('overview',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
-      Visión general
-    </button>
-    <button class="nav-item" onclick="goTo('rentabilidad',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 8L9 10L14 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Rentabilidad
-      <span class="nav-badge">2</span>
-    </button>
-    <button class="nav-item" onclick="goTo('cosechas',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      Negocios ganados
-      <span class="nav-badge">3</span>
-    </button>
-    <button class="nav-item" onclick="goTo('reciprocidad',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 5l3 3-3 3M6 5l-3 3 3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Reciprocidad
-    </button>
-  </div>
-  <div class="sidebar-section">
-    <div class="sidebar-section-label">KPIs Económicos</div>
-    <button class="nav-item" onclick="goTo('roa',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M4 6l4-4 4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      ROA Depósitos
-    </button>
-    <button class="nav-item" onclick="goTo('ror',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="5" cy="8" r="3" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="8" r="3" stroke="currentColor" stroke-width="1.2"/></svg>
-      Return on Relationship
-    </button>
-    <button class="nav-item" onclick="goTo('fondeo',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 13h12M4 13V7l4-4 4 4v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Fondeo Vital
-    </button>
-    <button class="nav-item" onclick="goTo('velocidad',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 8a6 6 0 1112 0M8 8l-3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      Velocidad del dinero
-    </button>
-  </div>
-  <div class="sidebar-section">
-    <div class="sidebar-section-label">Portafolio</div>
-    <button class="nav-item" onclick="goTo('clientes',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      Top clientes
-    </button>
-    <button class="nav-item" onclick="goTo('maestro',this)">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      Cuadro maestro
-    </button>
-  </div>
-</nav>
-
-<div class="main">
-  <div class="topbar">
-    <div class="topbar-left">
-      <div class="topbar-title" id="page-title">Visión general del portafolio</div>
-      <div class="topbar-sub">Area de Cash Management · Vicepresidencia Banca Empresas · Ene 2023 – May 2025</div>
-    </div>
-    <div class="topbar-right">
-      <span style="font-size:11px;color:var(--text3);">Filtrar por segmento:</span>
-      <button class="seg-pill on" id="pill-todos" onclick="setSeg('Todos',this)">Todos</button>
-      <button class="seg-pill corp" id="pill-corp" onclick="setSeg('Corporativo',this)">Corporativo</button>
-      <button class="seg-pill emp" id="pill-emp" onclick="setSeg('Empresarial',this)">Empresarial</button>
-      <button class="seg-pill ofic" id="pill-ofic" onclick="setSeg('Oficial',this)">Oficial</button>
-      <span class="seg-indicator" id="seg-indicator"></span>
-    </div>
-  </div>
-
-  <div class="content">
-
-  <!-- ===== OVERVIEW ===== -->
-  <div class="page active" id="page-overview">
-    <div class="kpi-row" id="kpi-overview"></div>
-    <div class="grid-7030">
-      <div class="card">
-        <div class="card-title">Flujos de entrada mensuales — serie de tiempo <span id="lbl-fe-time">todos los segmentos · MM COP</span></div>
-        <div class="legend">
-          <span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Flujos entrada</span>
-          <span class="leg"><span class="leg-dot" style="background:#f85149"></span>Flujos salida</span>
-          <span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Flujo neto</span>
-        </div>
-        <div style="position:relative;height:220px"><canvas id="ch-fe-time"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Empresas por segmento</div>
-        <div style="position:relative;height:160px"><canvas id="ch-donut"></canvas></div>
-        <div style="margin-top:8px">
-          <div class="prog-row"><div class="prog-head"><span>Corporativo</span><strong>5,059 · 36.2%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:50%;background:#58a6ff"></div></div></div>
-          <div class="prog-row"><div class="prog-head"><span>Empresarial</span><strong>5,884 · 42.1%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:58%;background:#3fb950"></div></div></div>
-          <div class="prog-row"><div class="prog-head"><span>Oficial</span><strong>2,819 · 20.2%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:28%;background:#d29922"></div></div></div>
-        </div>
-      </div>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title">Comisiones por segmento y año <span>COP · % participación</span></div>
-        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Corporativo</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Empresarial</span><span class="leg"><span class="leg-dot" style="background:#d29922"></span>Oficial</span></div>
-        <div style="position:relative;height:190px"><canvas id="ch-com-seg"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Flujos de entrada por segmento y año <span>MM COP · % participación</span></div>
-        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Corporativo</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Empresarial</span><span class="leg"><span class="leg-dot" style="background:#d29922"></span>Oficial</span></div>
-        <div style="position:relative;height:190px"><canvas id="ch-fe-seg"></canvas></div>
-      </div>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title">Negocios ganados por año <span>% var. interanual</span></div>
-        <div style="position:relative;height:180px"><canvas id="ch-neg-yr"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Comisiones mensuales por segmento <span>COP</span></div>
-        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Corporativo</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Empresarial</span><span class="leg"><span class="leg-dot" style="background:#d29922"></span>Oficial</span></div>
-        <div style="position:relative;height:150px"><canvas id="ch-com-seg-monthly"></canvas></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== RENTABILIDAD ===== -->
-  <div class="page" id="page-rentabilidad">
-    <div class="kpi-row" id="kpi-rentabilidad"></div>
-    <div class="grid-7030">
-      <div class="card">
-        <div class="card-title">Evolución mensual comisiones <span id="lbl-rent">por segmento · COP</span></div>
-        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Corp.</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Emp.</span><span class="leg"><span class="leg-dot" style="background:#d29922"></span>Ofic.</span></div>
-        <div style="position:relative;height:230px"><canvas id="ch-rent-monthly"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Participación 2024 <span>% del total</span></div>
-        <div style="position:relative;height:160px"><canvas id="ch-rent-pie"></canvas></div>
-        <div style="margin-top:10px">
-          <div class="info-row"><div><div class="info-name">Corporativo</div></div><div class="info-val" style="color:#58a6ff">85.8%</div></div>
-          <div class="info-row"><div><div class="info-name">Empresarial</div></div><div class="info-val" style="color:#3fb950">10.1%</div></div>
-          <div class="info-row"><div><div class="info-name">Oficial</div></div><div class="info-val" style="color:#d29922">4.1%</div></div>
-        </div>
-      </div>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title">Flujo neto por año <span>MM COP · % variación</span></div>
-        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Entrada</span><span class="leg"><span class="leg-dot" style="background:#f85149"></span>Salida</span></div>
-        <div style="position:relative;height:190px"><canvas id="ch-flujo-neto"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Cuadro comparativo por segmento</div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Segmento</th><th>2023 (K)</th><th>2024 (K)</th><th>2025 YTD</th><th>Var.</th><th>Part.%</th></tr></thead>
-            <tbody id="tb-rent"></tbody>
-          </table>
-        </div>
-        <div style="margin-top:14px">
-          <div class="prog-row"><div class="prog-head"><span>MC/empresa Corporativo</span><strong>$924K · 85.8%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:100%;background:#58a6ff"></div></div></div>
-          <div class="prog-row"><div class="prog-head"><span>MC/empresa Oficial</span><strong>$72K · 4.1%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:7.8%;background:#d29922"></div></div></div>
-          <div class="prog-row"><div class="prog-head"><span>MC/empresa Empresarial</span><strong>$68K · 10.1%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:7.4%;background:#3fb950"></div></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== COSECHAS ===== -->
-  <div class="page" id="page-cosechas">
-    <div class="kpi-row" id="kpi-cosechas"></div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title">Negocios ganados por segmento y año <span>% var.</span></div>
-        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Corp.</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Emp.</span><span class="leg"><span class="leg-dot" style="background:#d29922"></span>Ofic.</span></div>
-        <div style="position:relative;height:210px"><canvas id="ch-neg-seg"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Top 12 productos más negociados <span>% part.</span></div>
-        <div style="position:relative;height:210px"><canvas id="ch-prod"></canvas></div>
-      </div>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title">Crecimiento empresas captadas <span>% acumulado</span></div>
-        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Corp.</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Emp.</span><span class="leg"><span class="leg-dot" style="background:#d29922"></span>Ofic.</span></div>
-        <div style="position:relative;height:190px"><canvas id="ch-emp-growth"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Top empresas por negocios ganados</div>
-        <div class="table-wrap"><table>
-          <thead><tr><th>Empresa</th><th>Seg.</th><th>Negocios</th><th>Part.%</th><th>Producto líder</th></tr></thead>
-          <tbody>
-            <tr><td>Fiduciaria Bogotá</td><td><span class="badge corp">Corp.</span></td><td>137</td><td>1.0%</td><td>Barras, Disfon</td></tr>
-            <tr><td>Santiago de Cali</td><td><span class="badge ofic">Ofic.</span></td><td>120</td><td>0.9%</td><td>Adquirencia</td></tr>
-            <tr><td>Terpel</td><td><span class="badge corp">Corp.</span></td><td>84</td><td>0.6%</td><td>Adquirencia</td></tr>
-            <tr><td>Amarilo</td><td><span class="badge corp">Corp.</span></td><td>76</td><td>0.5%</td><td>Adquirencia</td></tr>
-            <tr><td>Emcali</td><td><span class="badge ofic">Ofic.</span></td><td>72</td><td>0.5%</td><td>Adquirencia</td></tr>
-            <tr><td>Fiduciaria Bogotá 2</td><td><span class="badge corp">Corp.</span></td><td>67</td><td>0.5%</td><td>Barras, Disfon</td></tr>
-            <tr><td>Sidoc S.A.S.</td><td><span class="badge corp">Corp.</span></td><td>55</td><td>0.4%</td><td>Tarjeta Crédito</td></tr>
-          </tbody>
-        </table></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== RECIPROCIDAD ===== -->
-  <div class="page" id="page-reciprocidad">
-    <div class="kpi-row" id="kpi-reciprocidad"></div>
-    <div class="card" style="margin-bottom:16px">
-      <div class="card-title">Reciprocidad mensual — Flujos entrada vs Saldos CC+CA <span>eje dual · MM COP</span></div>
-      <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Flujos entrada (izq.)</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Saldos CC+CA (der.)</span></div>
-      <div style="position:relative;height:220px"><canvas id="ch-recip-dual"></canvas></div>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title">Saldos promedio por año <span>CC y CA · % var.</span></div>
-        <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Saldo CC</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Saldo CA</span></div>
-        <div style="position:relative;height:200px"><canvas id="ch-saldos-yr"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Coeficiente de retención mensual <span>Saldo / Flujo</span></div>
-        <div style="position:relative;height:200px"><canvas id="ch-retencion"></canvas></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== ROA ===== -->
-  <div class="page" id="page-roa">
-    <div class="kpi-row-3" id="kpi-roa"></div>
-    <div class="grid-3070">
-      <div class="card">
-        <div class="card-title">ROA por segmento 2024</div>
-        <div class="info-row"><div><div class="info-name">Corporativo</div><div class="info-sub">Alto vol., bajo costo captación</div></div><div><div class="info-val" style="color:#58a6ff">9.4%</div><span class="chip chip-ok">Óptimo</span></div></div>
-        <div class="info-row"><div><div class="info-name">Empresarial</div><div class="info-sub">Crecimiento acelerado</div></div><div><div class="info-val" style="color:#3fb950">8.1%</div><span class="chip chip-ok">Estable</span></div></div>
-        <div class="info-row"><div><div class="info-name">Oficial</div><div class="info-sub">Alta estacionalidad</div></div><div><div class="info-val" style="color:#d29922">7.6%</div><span class="chip chip-warn">Moderado</span></div></div>
-        <div style="margin-top:14px">
-          <div class="formula"><small>Fórmula adaptada Cash Management</small>ROA_dep = Comisiones / Saldo_dep_prom(CC+CA)</div>
-          <div class="formula" style="border-color:#3fb950"><small>FTP estimado (proxy BdB)</small>FTP_est ≈ Saldo_prom × 8.99%</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">ROA depósitos mensual estimado <span>%</span></div>
-        <div style="position:relative;height:250px"><canvas id="ch-roa-monthly"></canvas></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">ROA depósitos por segmento 2023 vs 2024 vs 2025 <span>%</span></div>
-      <div style="position:relative;height:180px"><canvas id="ch-roa-seg"></canvas></div>
-    </div>
-  </div>
-
-  <!-- ===== RoR ===== -->
-  <div class="page" id="page-ror">
-    <div class="kpi-row-3" id="kpi-ror"></div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title">Componentes del RoR — Estado de resultados BdB</div>
-        <div class="prog-row"><div class="prog-head"><span>Ingreso FTP depósitos (pasivo)</span><strong style="color:#58a6ff">8.99% · 84% del total</strong></div><div class="prog-bar"><div class="prog-fill" style="width:90%;background:#58a6ff"></div></div></div>
-        <div class="prog-row"><div class="prog-head"><span>Comisiones Cash</span><strong style="color:#bc8cff">0.37% · 4%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:4%;background:#bc8cff"></div></div></div>
-        <div class="prog-row"><div class="prog-head"><span>Margen intereses cartera</span><strong style="color:#3fb950">1.39% · 13%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:14%;background:#3fb950"></div></div></div>
-        <div class="prog-row"><div class="prog-head"><span>Otros ingresos</span><strong style="color:#8b949e">0.14% · 1%</strong></div><div class="prog-bar"><div class="prog-fill" style="width:1.5%;background:#8b949e"></div></div></div>
-        <div style="margin-top:10px;font-size:11px;color:var(--text3);line-height:1.6">Fuente: Estado de resultados Banca Empresas oct-2023. El FTP depósitos representa el 83% del margen financiero neto total.</div>
-        <div style="margin-top:12px">
-          <div class="formula"><small>RoR completo</small>RoR = (Com_cash + FTP_dep + Margen_cart) / (Saldo_dep + Cartera)</div>
-          <div class="formula" style="border-color:#bc8cff"><small>Proxy disponible</small>RoR_proxy = Comisiones / (Saldo_CC + Saldo_CA)</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">RoR proxy por segmento — evolución 2023–2025 <span>%</span></div>
-        <div style="position:relative;height:200px"><canvas id="ch-ror-seg"></canvas></div>
-        <div style="margin-top:14px">
-          <div class="info-row"><div><div class="info-name">Corporativo</div><div class="info-sub">84% del Margen Fin. Neto</div></div><div class="info-val" style="color:#58a6ff">4.68%</div></div>
-          <div class="info-row"><div><div class="info-name">Empresarial</div><div class="info-sub">Mayor crecimiento captación</div></div><div class="info-val" style="color:#3fb950">3.88%</div></div>
-          <div class="info-row"><div><div class="info-name">Oficial</div><div class="info-sub">Estacionalidad tributaria</div></div><div class="info-val" style="color:#d29922">3.44%</div></div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Radar desempeño multidimensional por segmento <span>Índices norm. 0–100</span></div>
-      <div style="position:relative;height:240px"><canvas id="ch-radar"></canvas></div>
-    </div>
-  </div>
-
-  <!-- ===== FONDEO ===== -->
-  <div class="page" id="page-fondeo">
-    <div class="kpi-row-3" id="kpi-fondeo"></div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title">Estructura del fondeo 2024 <span>% participación</span></div>
-        <div class="info-row"><div><div class="info-name">Fondeo vital (transaccional)</div><div class="info-sub">CC + CA de clientes Cash activos</div></div><div><div class="info-val" style="color:#3fb950">41.7%</div><span class="chip chip-ok">Bajo costo</span></div></div>
-        <div class="info-row"><div><div class="info-name">Proveedores de liquidez</div><div class="info-sub">Depósitos alto vol., tasa-sensibles</div></div><div><div class="info-val" style="color:#d29922">38.2%</div><span class="chip chip-warn">Costo medio</span></div></div>
-        <div class="info-row"><div><div class="info-name">Ancla (CDT / largos plazos)</div><div class="info-sub">Sensibles a tasa, riesgo de salida</div></div><div><div class="info-val" style="color:#f85149">20.1%</div><span class="chip chip-risk">Alto costo</span></div></div>
-        <div style="margin-top:14px">
-          <div class="formula"><small>Índice de Fondeo Vital</small>IFV = Dep_cash / Dep_totales_banca</div>
-          <div class="formula" style="border-color:#3fb950"><small>Ahorro en costo de fondeo</small>Ahorro = Saldo_dep × (Tasa_CDT − Tasa_CC_vista) ≈ 4.5%</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Evolución IFV y ahorro estimado <span>% y MM COP</span></div>
-        <div style="position:relative;height:220px"><canvas id="ch-fondeo-ev"></canvas></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Saldos CC + CA mensuales — base del fondeo vital <span>MM COP</span></div>
-      <div class="legend"><span class="leg"><span class="leg-dot" style="background:#58a6ff"></span>Saldo CC</span><span class="leg"><span class="leg-dot" style="background:#3fb950"></span>Saldo CA</span></div>
-      <div style="position:relative;height:180px"><canvas id="ch-saldos-monthly"></canvas></div>
-    </div>
-  </div>
-
-  <!-- ===== VELOCIDAD ===== -->
-  <div class="page" id="page-velocidad">
-    <div class="kpi-row-3" id="kpi-velocidad"></div>
-    <div class="grid-3070">
-      <div class="card">
-        <div class="card-title">Días de permanencia por segmento</div>
-        <div class="info-row"><div><div class="info-name">Corporativo</div><div class="info-sub">Mayor volumen, ciclo corto</div></div><div><div class="info-val" style="color:#58a6ff">~38 días</div><span class="chip chip-ok">Alto fondeo</span></div></div>
-        <div class="info-row"><div><div class="info-name">Empresarial</div><div class="info-sub">Ciclo operacional medio</div></div><div><div class="info-val" style="color:#3fb950">~52 días</div><span class="chip chip-ok">Estable</span></div></div>
-        <div class="info-row"><div><div class="info-name">Oficial</div><div class="info-sub">Alta estacionalidad tributaria</div></div><div><div class="info-val" style="color:#d29922">~31 días</div><span class="chip chip-warn">Estacional</span></div></div>
-        <div style="margin-top:14px">
-          <div class="formula"><small>Velocidad transaccional (MV = PQ)</small>V_tx = Flujos_entrada_acum / Saldo_prom_CC+CA</div>
-          <div class="formula" style="border-color:#d29922"><small>Días de permanencia (seguimiento BdB)</small>D_perm = Saldo_prom × 365 / Flujos_entrada</div>
-        </div>
-        <div style="margin-top:12px;font-size:11px;color:var(--text3);line-height:1.6">El segmento empresarial es más valioso por permanencia que por volumen. Mayor permanencia = más fondeo vital de bajo costo.</div>
-      </div>
-      <div class="card">
-        <div class="card-title">Velocidad transaccional mensual <span>Flujos / Saldo dep. — ×</span></div>
-        <div style="position:relative;height:260px"><canvas id="ch-velocidad"></canvas></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Velocidad por segmento 2023–2025 <span>% variación interanual</span></div>
-      <div style="position:relative;height:180px"><canvas id="ch-vel-seg"></canvas></div>
-    </div>
-  </div>
-
-  <!-- ===== CLIENTES ===== -->
-  <div class="page" id="page-clientes">
-    <div class="kpi-row-3" id="kpi-clientes"></div>
-    <div class="grid-7030">
-      <div class="card">
-        <div class="card-title">Top 15 clientes por comisiones acumuladas 2023–2025 <span>COP · % del total portafolio</span></div>
-        <div class="table-wrap"><table>
-          <thead><tr><th>#</th><th>Empresa</th><th>Seg.</th><th>Comisiones</th><th>% Total</th><th>Participación</th></tr></thead>
-          <tbody>
-            <tr><td>1</td><td>EPS Sanitas S.A.S</td><td><span class="badge corp">Corp.</span></td><td>$764,074</td><td>31.5%</td><td><div class="prog-bar"><div class="prog-fill" style="width:100%;background:#58a6ff"></div></div></td></tr>
-            <tr><td>2</td><td>Mercadopago Colombia Ltda</td><td><span class="badge corp">Corp.</span></td><td>$355,477</td><td>14.7%</td><td><div class="prog-bar"><div class="prog-fill" style="width:46.5%;background:#58a6ff"></div></div></td></tr>
-            <tr><td>3</td><td>Fiduciaria Bogotá S.A.</td><td><span class="badge corp">Corp.</span></td><td>$103,443</td><td>4.3%</td><td><div class="prog-bar"><div class="prog-fill" style="width:13.5%;background:#3fb950"></div></div></td></tr>
-            <tr><td>4</td><td>Organización Terpel S.A.</td><td><span class="badge corp">Corp.</span></td><td>$57,126</td><td>2.4%</td><td><div class="prog-bar"><div class="prog-fill" style="width:7.5%;background:#3fb950"></div></div></td></tr>
-            <tr><td>5</td><td>Fiduciaria Bogotá S.A. (2)</td><td><span class="badge corp">Corp.</span></td><td>$49,440</td><td>2.0%</td><td><div class="prog-bar"><div class="prog-fill" style="width:6.5%;background:#3fb950"></div></div></td></tr>
-            <tr><td>6</td><td>Comunicación Celular Comcel</td><td><span class="badge corp">Corp.</span></td><td>$48,089</td><td>2.0%</td><td><div class="prog-bar"><div class="prog-fill" style="width:6.3%;background:#3fb950"></div></div></td></tr>
-            <tr><td>7</td><td>Sistecredito S.A.S.</td><td><span class="badge corp">Corp.</span></td><td>$42,978</td><td>1.8%</td><td><div class="prog-bar"><div class="prog-fill" style="width:5.6%;background:#3fb950"></div></div></td></tr>
-            <tr><td>8</td><td>Amarilo S.A.S.</td><td><span class="badge corp">Corp.</span></td><td>$31,956</td><td>1.3%</td><td><div class="prog-bar"><div class="prog-fill" style="width:4.2%;background:#d29922"></div></div></td></tr>
-            <tr><td>9</td><td>Admin. e Inv. Comerciales</td><td><span class="badge corp">Corp.</span></td><td>$29,850</td><td>1.2%</td><td><div class="prog-bar"><div class="prog-fill" style="width:3.9%;background:#d29922"></div></div></td></tr>
-            <tr><td>10</td><td>Patrimonios Autónomos Fid.</td><td><span class="badge corp">Corp.</span></td><td>$24,776</td><td>1.0%</td><td><div class="prog-bar"><div class="prog-fill" style="width:3.2%;background:#d29922"></div></div></td></tr>
-            <tr><td>11</td><td>Centrales Eléctricas Nariño</td><td><span class="badge ofic">Ofic.</span></td><td>$21,752</td><td>0.9%</td><td><div class="prog-bar"><div class="prog-fill" style="width:2.8%;background:#d29922"></div></div></td></tr>
-            <tr><td>12</td><td>MAC Center Colombia</td><td><span class="badge corp">Corp.</span></td><td>$19,491</td><td>0.8%</td><td><div class="prog-bar"><div class="prog-fill" style="width:2.5%;background:#d29922"></div></div></td></tr>
-            <tr><td>13</td><td>Fiduciaria Popular Fiduciar</td><td><span class="badge corp">Corp.</span></td><td>$18,238</td><td>0.8%</td><td><div class="prog-bar"><div class="prog-fill" style="width:2.4%;background:#d29922"></div></div></td></tr>
-            <tr><td>14</td><td>Comfama</td><td><span class="badge corp">Corp.</span></td><td>$17,909</td><td>0.7%</td><td><div class="prog-bar"><div class="prog-fill" style="width:2.3%;background:#d29922"></div></div></td></tr>
-            <tr><td>15</td><td>Mondelez Colombia S.A.S.</td><td><span class="badge corp">Corp.</span></td><td>$17,048</td><td>0.7%</td><td><div class="prog-bar"><div class="prog-fill" style="width:2.2%;background:#d29922"></div></div></td></tr>
-          </tbody>
-        </table></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Concentración de comisiones <span>% acum.</span></div>
-        <div style="position:relative;height:200px"><canvas id="ch-concentracion"></canvas></div>
-        <div style="margin-top:12px;font-size:11px;color:var(--text3);line-height:1.6">Top 2 empresas (EPS Sanitas + Mercadopago) concentran el <strong style="color:#f85149">47.4%</strong> de las comisiones totales. Riesgo de concentración alto que amerita diversificación activa.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== MAESTRO ===== -->
-  <div class="page" id="page-maestro">
-    <div class="section-title">Marco completo de KPIs económicos — Cash Management BdB 2023–2025</div>
-    <div class="card" style="margin-bottom:16px">
-      <div class="table-wrap"><table>
-        <thead><tr><th>Indicador</th><th>Familia</th><th>Fórmula</th><th>2023</th><th>2024</th><th>Var.</th><th>% Cambio</th><th>Interpretación</th></tr></thead>
-        <tbody>
-          <tr><td><strong>ROA depósitos</strong></td><td><span class="badge corp">Rentabilidad</span></td><td style="font-family:monospace;font-size:11px">Com/Saldo_dep</td><td>8.44%</td><td>9.12%</td><td class="up">↑+68pb</td><td class="up">+8.1%</td><td style="color:var(--text2)">Rendimiento sobre depósitos captados por cash</td></tr>
-          <tr><td><strong>Return on Relationship</strong></td><td><span class="badge pyme">Relación</span></td><td style="font-family:monospace;font-size:11px">(Com+FTP)/(Dep+Cart)</td><td>4.02%</td><td>4.46%</td><td class="up">↑+44pb</td><td class="up">+10.9%</td><td style="color:var(--text2)">Valor total de la relación banco-empresa</td></tr>
-          <tr><td><strong>Índice fondeo vital</strong></td><td><span class="badge emp">Fondeo</span></td><td style="font-family:monospace;font-size:11px">Dep_cash/Dep_total</td><td>34.2%</td><td>41.7%</td><td class="up">↑+7.5pp</td><td class="up">+21.9%</td><td style="color:var(--text2)">Fracción del fondeo de bajo costo captado</td></tr>
-          <tr><td><strong>MC / empresa</strong></td><td><span class="badge corp">Rentabilidad</span></td><td style="font-family:monospace;font-size:11px">MC_total/N_empresas</td><td>$179K</td><td>$199K</td><td class="up">↑+$20K</td><td class="up">+11.2%</td><td style="color:var(--text2)">Rentabilidad directa promedio por cliente</td></tr>
-          <tr><td><strong>Velocidad transaccional</strong></td><td><span class="badge ofic">Eficiencia</span></td><td style="font-family:monospace;font-size:11px">Flujos/Saldo_prom</td><td>3.95x</td><td>8.62x</td><td class="up">↑+4.67x</td><td class="up">+118.2%</td><td style="color:var(--text2)">Intensidad de uso de servicios cash (MV=PQ)</td></tr>
-          <tr><td><strong>Días de permanencia</strong></td><td><span class="badge emp">Fondeo</span></td><td style="font-family:monospace;font-size:11px">Saldo×365/Flujos</td><td>~92d</td><td>~42d</td><td class="dn">↓−50d</td><td class="dn">−54.3%</td><td style="color:var(--text2)">Mayor rotación 2024 por activación de negocios</td></tr>
-          <tr><td><strong>TCAC comisiones</strong></td><td><span class="badge corp">Rentabilidad</span></td><td style="font-family:monospace;font-size:11px">(Ct/C0)^(1/n)−1</td><td>base</td><td>+12.0%</td><td class="up">↑+12%</td><td class="up">+18.7% proy.</td><td style="color:var(--text2)">Crecimiento compuesto anual de la rentabilidad</td></tr>
-          <tr><td><strong>Coeficiente retención</strong></td><td><span class="badge pyme">Reciprocidad</span></td><td style="font-family:monospace;font-size:11px">Saldo_prom/Flujo_ent</td><td>0.253</td><td>0.116</td><td class="dn">↓−0.14</td><td class="dn">−54.2%</td><td style="color:var(--text2)">Fracción del flujo que permanece como saldo</td></tr>
-          <tr><td><strong>Índice de penetración</strong></td><td><span class="badge ofic">Eficiencia</span></td><td style="font-family:monospace;font-size:11px">Negocios/Empresas</td><td>2.24x</td><td>2.81x</td><td class="up">↑+0.57x</td><td class="up">+25.4%</td><td style="color:var(--text2)">Profundidad promedio de productos por cliente</td></tr>
-          <tr><td><strong>Elasticidad neg-flujo</strong></td><td><span class="badge ofic">Eficiencia</span></td><td style="font-family:monospace;font-size:11px">Δ%Flujos/Δ%Negocios</td><td>—</td><td>1.35x</td><td class="up">↑Positiva</td><td class="up">N/A</td><td style="color:var(--text2)">1% más negocios genera 1.35% más flujos</td></tr>
-          <tr><td><strong>Densidad transaccional</strong></td><td><span class="badge ofic">Eficiencia</span></td><td style="font-family:monospace;font-size:11px">ΣFlujos/N_empresas</td><td>$493M</td><td>$1.209B</td><td class="up">↑+$716M</td><td class="up">+145.2%</td><td style="color:var(--text2)">Flujo entrada promedio por empresa activa</td></tr>
-        </tbody>
-      </table></div>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title">Crecimiento KPIs clave 2023→2024 <span>%</span></div>
-        <div style="position:relative;height:220px"><canvas id="ch-kpi-growth"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Radar desempeño multidimensional</div>
-        <div style="position:relative;height:220px"><canvas id="ch-radar2"></canvas></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Matriz rentabilidad — Comisiones vs Flujos por segmento 2024 <span>Tamaño burbuja = empresas captadas</span></div>
-      <div style="position:relative;height:220px"><canvas id="ch-matrix"></canvas></div>
-    </div>
-  </div>
-
-  </div><!-- end content -->
-  <div class="footer">
-    <span>Dashboard Cash Management · Banco de Bogotá · Análisis 2023–2025</span>
-    <span>Vicepresidencia Banca Empresas · bases_proyecto_bdb.xlsx · cosechas_2325.xlsx</span>
-  </div>
-</div><!-- end main -->
-</div><!-- end shell -->
-
+:root{--azul:#00205B;--azulc:#0046AD;--azul2:#0A6BD8;--dorado:#C8A04B;--doradoc:#E0C074;
+--bg:#0B1220;--panel:#121C2E;--panel2:#18243A;--linea:#243349;--txt:#E6ECF5;--txt2:#94A3B8;
+--verde:#2DD4A7;--rojo:#F4636E;--corp:#0A6BD8;--emp:#5B9BE8;--ofi:#C8A04B;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:'IBM Plex Sans',sans-serif;display:flex;min-height:100vh;
+background-image:radial-gradient(circle at 15% 0%,rgba(0,70,173,.12),transparent 40%),radial-gradient(circle at 85% 100%,rgba(200,160,75,.08),transparent 45%);}
+.side{width:260px;background:linear-gradient(180deg,#0A1426,#0B1220);border-right:1px solid var(--linea);
+padding:28px 0;position:fixed;height:100vh;overflow-y:auto}
+.brand{padding:0 24px 24px;border-bottom:1px solid var(--linea);margin-bottom:16px}
+.brand .logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.brand .dot{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--azul2),var(--dorado));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:15px}
+.brand h1{font-size:15px;font-weight:700;letter-spacing:.3px}
+.brand p{font-size:11px;color:var(--txt2);margin-top:2px}
+.nav{list-style:none;padding:0 12px}
+.nav li{margin:2px 0}
+.nav a{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:10px;color:var(--txt2);
+text-decoration:none;font-size:13.5px;font-weight:500;transition:.18s;cursor:pointer}
+.nav a:hover{background:var(--panel2);color:var(--txt)}
+.nav a.active{background:linear-gradient(90deg,rgba(0,70,173,.25),rgba(0,70,173,.05));color:#fff;border-left:3px solid var(--dorado)}
+.nav .ic{width:18px;text-align:center;font-size:15px}
+.main{margin-left:260px;flex:1;padding:34px 44px;max-width:1500px}
+.head{margin-bottom:28px}
+.head .crumb{font-size:12px;color:var(--dorado);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.head h2{font-size:30px;font-weight:700;letter-spacing:-.5px}
+.head p{color:var(--txt2);margin-top:8px;font-size:14px;max-width:760px;line-height:1.6}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px;margin-bottom:26px}
+.card{background:linear-gradient(160deg,var(--panel),var(--panel2));border:1px solid var(--linea);border-radius:16px;padding:22px;position:relative;overflow:hidden}
+.card::after{content:'';position:absolute;top:0;right:0;width:80px;height:80px;background:radial-gradient(circle,rgba(200,160,75,.14),transparent 70%)}
+.card .k{font-size:12px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.8px}
+.card .v{font-size:30px;font-weight:700;margin:8px 0 4px;font-family:'IBM Plex Mono',monospace;color:#fff}
+.card .s{font-size:12.5px;color:var(--txt2)}
+.card .s b{color:var(--verde)}
+.card.gold{border-color:rgba(200,160,75,.4)}
+.card.gold .v{color:var(--doradoc)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:22px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:22px}
+@media(max-width:1100px){.grid2,.grid3{grid-template-columns:1fr}}
+.panel{background:linear-gradient(160deg,var(--panel),rgba(18,28,46,.6));border:1px solid var(--linea);border-radius:16px;padding:22px}
+.panel h3{font-size:15px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.panel h3 .bar{width:4px;height:16px;background:var(--dorado);border-radius:2px}
+.panel .sub{font-size:12px;color:var(--txt2);margin-bottom:18px}
+.chartbox{position:relative;height:300px}
+.chartbox.sm{height:240px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:11px 12px;text-align:right;border-bottom:1px solid var(--linea)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--dorado);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.6px}
+td{font-family:'IBM Plex Mono',monospace;color:var(--txt)}
+td:first-child{font-family:'IBM Plex Sans';font-weight:500}
+tr:hover td{background:rgba(0,70,173,.08)}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;font-family:'IBM Plex Sans'}
+.tag.corp{background:rgba(10,107,216,.18);color:#6BB0FF}
+.tag.emp{background:rgba(91,155,232,.18);color:#9BC4F5}
+.tag.ofi{background:rgba(200,160,75,.18);color:var(--doradoc)}
+.view{display:none}.view.active{display:block;animation:fade .4s}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.kpi-def{background:var(--panel2);border:1px solid var(--linea);border-radius:12px;padding:18px;margin-bottom:14px}
+.kpi-def .nm{font-weight:600;color:var(--doradoc);font-size:14px;margin-bottom:6px}
+.kpi-def .fx{font-family:'IBM Plex Mono';font-size:12.5px;color:var(--azul2);background:var(--bg);padding:8px 12px;border-radius:8px;margin:8px 0;display:inline-block}
+.kpi-def .ds{font-size:13px;color:var(--txt2);line-height:1.6}
+.note{background:rgba(200,160,75,.08);border-left:3px solid var(--dorado);padding:14px 18px;border-radius:8px;font-size:13px;line-height:1.6;color:var(--txt);margin-top:16px}
+.note b{color:var(--doradoc)}
+.flag{font-size:11px;padding:4px 10px;border-radius:6px;background:rgba(244,99,110,.15);color:var(--rojo);font-weight:600}
+.flag.ok{background:rgba(45,212,167,.15);color:var(--verde)}
+</style></head><body>
+<aside class="side">
+<div class="brand"><div class="logo"><div class="dot">B</div><h1>Cash Management</h1></div>
+<p>Banco de Bogotá · Banca Empresas</p></div>
+<ul class="nav">
+<li><a class="active" data-v="resumen"><span class="ic">◈</span>Resumen ejecutivo</a></li>
+<li><a data-v="rentab"><span class="ic">▤</span>Rentabilidad</a></li>
+<li><a data-v="recipro"><span class="ic">⇄</span>Reciprocidad y fondeo</a></li>
+<li><a data-v="negocios"><span class="ic">↗</span>Negocios ganados</a></li>
+<li><a data-v="individual"><span class="ic">◉</span>Análisis individual</a></li>
+<li><a data-v="impacto"><span class="ic">⊕</span>Impacto activación</a></li>
+<li><a data-v="kpis"><span class="ic">∑</span>Indicadores (KPIs)</a></li>
+<li><a data-v="limpieza"><span class="ic">⚐</span>Limpieza de datos</a></li>
+</ul></aside>
+<main class="main" id="main"></main>
 <script>
-/* ===== DATA ===== */
-const MONTHS=['Ene-23','Feb-23','Mar-23','Abr-23','May-23','Jun-23','Jul-23','Ago-23','Sep-23','Oct-23','Nov-23','Dic-23','Ene-24','Feb-24','Mar-24','Abr-24','May-24','Jun-24','Jul-24','Ago-24','Sep-24','Oct-24','Nov-24','Dic-24','Ene-25','Feb-25','Mar-25','Abr-25','May-25'];
+const CI={"top_valor": [{"nombre": "MUNICIPIO DE LOS PATIOS", "segmento": "Oficial", "comisiones": 28.14798, "saldo": 2057970.403672875, "roa": 1.3677543637053329e-05, "vel": 0.056034430927768705, "ifv": 32.94068650599564, "ror": 0.00024409177376467683, "flujo": 115317.20043599998, "valor": 422769.56840113644}, {"nombre": "E.S.E. HOSPITAL DEPARTAMENTAL SAN RAFAEL", "segmento": "Oficial", "comisiones": 1.4516399999999994, "saldo": 1355469.488440422, "roa": 1.070949964111866e-06, "vel": 0.10278651382651453, "ifv": 18.388193065308712, "ror": 1.0419168081908492e-05, "flujo": 139323.98331500002, "valor": 278437.4757238034}, {"nombre": "MUNICIPIO DE CARACOLI", "segmento": "Oficial", "comisiones": 1.2056399999999994, "saldo": 1154694.6048561602, "roa": 1.0441202331158249e-06, "vel": 0.015775990317603687, "ifv": 494.0749336133331, "ror": 6.618413247571154e-05, "flujo": 18216.450906, "valor": 237194.72238753625}, {"nombre": "MUNICIPIO DE SAN JOSE DE CUCUTA", "segmento": "Oficial", "comisiones": 4.33975, "saldo": 1140116.6563831852, "roa": 3.8064087351965156e-06, "vel": 0.22334147163482795, "ifv": 9.820566449282438, "ror": 1.7043000152789103e-05, "flujo": 254635.33187200004, "valor": 234203.30291537932}, {"nombre": "EPS SANITAS S.A.S", "segmento": "Corporativo", "comisiones": 53082.70571800001, "saldo": 708750.4532034788, "roa": 0.0748961859256268, "vel": 81.73018005466535, "ifv": 0.024714649690292263, "ror": 0.0009163834690628649, "flujo": 57926302.15414599, "valor": 198671.86131354797}, {"nombre": "MUNICIPIO DE PUERTO SANTANDER", "segmento": "Oficial", "comisiones": 0.16083999999999998, "saldo": 888270.9881714766, "roa": 1.8107086929754658e-07, "vel": 0.02224497801585917, "ifv": 87.18149569847812, "ror": 8.139853820869376e-06, "flujo": 19759.568604, "valor": 182465.82632689085}, {"nombre": "MUNICIPIO DE MONTELIBANO", "segmento": "Oficial", "comisiones": 0.8647899999999998, "saldo": 801932.4975853, "roa": 1.0783825354427837e-06, "vel": 0.3015321748103609, "ifv": 7.607274097229432, "ror": 3.576343175055857e-06, "flujo": 241808.45004799997, "valor": 164731.16533564703}, {"nombre": "GOBERNACION DEL MAGDALENA", "segmento": "Oficial", "comisiones": 0.7424090000000001, "saldo": 637618.6245338193, "roa": 1.164346478340083e-06, "vel": 0.3899786028690747, "ifv": 6.45653181228956, "ror": 2.9856675975912e-06, "flujo": 248657.62035899996, "valor": 130978.23486532205}], "top_comisiones": [{"nombre": "EPS SANITAS S.A.S", "segmento": "Corporativo", "comisiones": 53082.70571800001, "saldo": 708750.4532034788, "roa": 0.0748961859256268, "vel": 81.73018005466535, "ifv": 0.024714649690292263, "ror": 0.0009163834690628649, "flujo": 57926302.15414599, "valor": 198671.86131354797}, {"nombre": "COMUNICACION CELULAR SA COMCEL SA", "segmento": "Corporativo", "comisiones": 52848.327115, "saldo": 24.14320382142857, "roa": 2188.952531150562, "vel": 679457.4349795779, "ifv": 2.706740340162839e-06, "ror": 0.003221618336130731, "flujo": 16404279.340697, "valor": 52853.28653145165}, {"nombre": "MERCADOPAGO COLOMBIA LTDA", "segmento": "Corporativo", "comisiones": 13429.075845000001, "saldo": 103.05770231034482, "roa": 130.3063773395616, "vel": 120005.65182500254, "ifv": 1.3933342797828159e-05, "ror": 0.0010858353365688145, "flujo": 12367506.74134, "valor": 13450.245614682917}, {"nombre": "KOPPS COMMERCIAL S.A.S.", "segmento": "Corporativo", "comisiones": 7387.591297999999, "saldo": 42.86438996551724, "roa": 172.34798638084044, "vel": 299517.76437236596, "ifv": 6.665708960900302e-06, "ror": 0.000575418245198219, "flujo": 12838646.253657, "valor": 7396.396358105416}, {"nombre": "CONSORCIO EMCALI", "segmento": "Oficial", "comisiones": 5578.011572, "saldo": 183.71635507662833, "roa": 30.362084908953285, "vel": 218985.386304423, "ifv": 9.070193557642602e-06, "ror": 0.00013864890904978183, "flujo": 40231196.986896, "valor": 5615.749973271991}, {"nombre": "MAC CENTER COLOMBIA S.A.S.", "segmento": "Corporativo", "comisiones": 4898.688433000001, "saldo": 22.10847457142857, "roa": 221.57514382881575, "vel": 58234.71318205956, "ifv": 3.486561409128887e-05, "ror": 0.003804863658143279, "flujo": 1287480.67556, "valor": 4903.229882151549}, {"nombre": "CENTRALES ELECTRICAS DE NARINO SA ESP", "segmento": "Oficial", "comisiones": 4684.875518000001, "saldo": 2401.643006038462, "roa": 1.9506960469232093, "vel": 905.6997938611054, "ifv": 0.0021769168973552393, "ror": 0.00215379981329924, "flujo": 2175167.5754970005, "valor": 5178.213018823735}, {"nombre": "TPAGA SAS", "segmento": "Corporativo", "comisiones": 4628.6042099999995, "saldo": 36.60151385714286, "roa": 126.45936526192939, "vel": 76535.54727685991, "ifv": 2.588584750569702e-05, "ror": 0.0016522958254218125, "flujo": 2801316.8942180006, "valor": 4636.122770971488}], "top_fondeo": [{"nombre": "MUNICIPIO DE LOS PATIOS", "segmento": "Oficial", "comisiones": 28.14798, "saldo": 2057970.403672875, "roa": 1.3677543637053329e-05, "vel": 0.056034430927768705, "ifv": 32.94068650599564, "ror": 0.00024409177376467683, "flujo": 115317.20043599998, "valor": 422769.56840113644}, {"nombre": "E.S.E. HOSPITAL DEPARTAMENTAL SAN RAFAEL", "segmento": "Oficial", "comisiones": 1.4516399999999994, "saldo": 1355469.488440422, "roa": 1.070949964111866e-06, "vel": 0.10278651382651453, "ifv": 18.388193065308712, "ror": 1.0419168081908492e-05, "flujo": 139323.98331500002, "valor": 278437.4757238034}, {"nombre": "MUNICIPIO DE CARACOLI", "segmento": "Oficial", "comisiones": 1.2056399999999994, "saldo": 1154694.6048561602, "roa": 1.0441202331158249e-06, "vel": 0.015775990317603687, "ifv": 494.0749336133331, "ror": 6.618413247571154e-05, "flujo": 18216.450906, "valor": 237194.72238753625}, {"nombre": "MUNICIPIO DE SAN JOSE DE CUCUTA", "segmento": "Oficial", "comisiones": 4.33975, "saldo": 1140116.6563831852, "roa": 3.8064087351965156e-06, "vel": 0.22334147163482795, "ifv": 9.820566449282438, "ror": 1.7043000152789103e-05, "flujo": 254635.33187200004, "valor": 234203.30291537932}, {"nombre": "MUNICIPIO DE PUERTO SANTANDER", "segmento": "Oficial", "comisiones": 0.16083999999999998, "saldo": 888270.9881714766, "roa": 1.8107086929754658e-07, "vel": 0.02224497801585917, "ifv": 87.18149569847812, "ror": 8.139853820869376e-06, "flujo": 19759.568604, "valor": 182465.82632689085}, {"nombre": "MUNICIPIO DE MONTELIBANO", "segmento": "Oficial", "comisiones": 0.8647899999999998, "saldo": 801932.4975853, "roa": 1.0783825354427837e-06, "vel": 0.3015321748103609, "ifv": 7.607274097229432, "ror": 3.576343175055857e-06, "flujo": 241808.45004799997, "valor": 164731.16533564703}, {"nombre": "EPS SANITAS S.A.S", "segmento": "Corporativo", "comisiones": 53082.70571800001, "saldo": 708750.4532034788, "roa": 0.0748961859256268, "vel": 81.73018005466535, "ifv": 0.024714649690292263, "ror": 0.0009163834690628649, "flujo": 57926302.15414599, "valor": 198671.86131354797}, {"nombre": "GOBERNACION DEL MAGDALENA", "segmento": "Oficial", "comisiones": 0.7424090000000001, "saldo": 637618.6245338193, "roa": 1.164346478340083e-06, "vel": 0.3899786028690747, "ifv": 6.45653181228956, "ror": 2.9856675975912e-06, "flujo": 248657.62035899996, "valor": 130978.23486532205}], "top_roa": [{"nombre": "COMUNICACION CELULAR SA COMCEL SA", "segmento": "Corporativo", "comisiones": 52848.327115, "saldo": 24.14320382142857, "roa": 2188.952531150562, "vel": 679457.4349795779, "ifv": 2.706740340162839e-06, "ror": 0.003221618336130731, "flujo": 16404279.340697, "valor": 52853.28653145165}, {"nombre": "SISTECREDITO S.A.S.", "segmento": "Corporativo", "comisiones": 4402.9584620000005, "saldo": 13.716094793103448, "roa": 321.0067098846415, "vel": 212190.7733497427, "ifv": 1.0427453255496778e-05, "ror": 0.0015128212448499978, "flujo": 2910428.7614869997, "valor": 4405.775976472084}, {"nombre": "PROMOTORA DE CAFE COLOMBIA S.A.", "segmento": "Corporativo", "comisiones": 3776.6546180000014, "saldo": 11.775432586206895, "roa": 320.72321677793565, "vel": 31482.35583092204, "ifv": 3.1818485077374535e-05, "ror": 0.010187395711439123, "flujo": 370718.358742, "valor": 3779.073488110418}, {"nombre": "COMERCIALIZADORA NACIONAL SAS LTDA", "segmento": "Corporativo", "comisiones": 3461.801759, "saldo": 13.54139632142857, "roa": 255.64584898249194, "vel": 174704.60108418294, "ifv": 1.1436873066248661e-05, "ror": 0.0014633034699487206, "flujo": 2365744.242458001, "valor": 3464.58338749436}, {"nombre": "MAC CENTER COLOMBIA S.A.S.", "segmento": "Corporativo", "comisiones": 4898.688433000001, "saldo": 22.10847457142857, "roa": 221.57514382881575, "vel": 58234.71318205956, "ifv": 3.486561409128887e-05, "ror": 0.003804863658143279, "flujo": 1287480.67556, "valor": 4903.229882151549}, {"nombre": "PARTNERS TELECOM COLOMBIA SAS", "segmento": "Corporativo", "comisiones": 2402.8688200000006, "saldo": 13.757953068965517, "roa": 174.65307578496314, "vel": 5354.861094938997, "ifv": 0.00018676048166557877, "ror": 0.032615799492919026, "flujo": 73671.92763500001, "valor": 2405.694932859584}, {"nombre": "KOPPS COMMERCIAL S.A.S.", "segmento": "Corporativo", "comisiones": 7387.591297999999, "saldo": 42.86438996551724, "roa": 172.34798638084044, "vel": 299517.76437236596, "ifv": 6.665708960900302e-06, "ror": 0.000575418245198219, "flujo": 12838646.253657, "valor": 7396.396358105416}, {"nombre": "NATURA COSMETICOS LTDA", "segmento": "Corporativo", "comisiones": 2012.6367430000003, "saldo": 12.142104999999999, "roa": 165.75682247847473, "vel": 22821.047748804678, "ifv": 4.3820649984617335e-05, "ror": 0.00726333095232916, "flujo": 277095.557976, "valor": 2015.1309337354169}]};
+const CR={"total": 15184, "empresas": 3573, "por_segmento": {"Corporativo": 3034, "Empresarial": 4883, "Oficial": 7267}, "por_base": {"Depósitos CA": 2889, "Depósitos CC": 3022, "Depósitos CDT": 54, "Saldos CA": 4040, "Saldos CC": 4958, "Saldos CDT": 221}, "empresas_por_segmento": {"Empresarial": 1748, "Corporativo": 1052, "Oficial": 773}, "top_empresas": [{"nombre": "MUNICIPIO DE BELEN", "segmento": "Oficial", "celdas": 36}, {"nombre": "FEDERACION NACIONAL DE CAFETEROS DE COLOMBIA", "segmento": "Corporativo", "celdas": 34}, {"nombre": "MUNICIPIO DE CHINU", "segmento": "Oficial", "celdas": 34}, {"nombre": "MUNICIPIO DE RECETOR", "segmento": "Oficial", "celdas": 33}, {"nombre": "FIDUCIARIA BOGOTA S.A. FIDUBOGOTA S.A.", "segmento": "Corporativo", "celdas": 33}, {"nombre": "TRANSPORTADORES ASOCIADOS DEL CARIBE S.A.", "segmento": "Empresarial", "celdas": 28}, {"nombre": "MUNICIPIO DE QUIBDO", "segmento": "Oficial", "celdas": 28}, {"nombre": "MUNICIPIO DE PUERTO GAITAN", "segmento": "Oficial", "celdas": 28}, {"nombre": "MUNICIPIO DE RESTREPO", "segmento": "Oficial", "celdas": 28}, {"nombre": "MUNICIPIO DE ALMEIDA - BOYACA", "segmento": "Oficial", "celdas": 28}, {"nombre": "MUNICIPIO DE LOS CORDOBAS", "segmento": "Oficial", "celdas": 27}, {"nombre": "MUNICIPIO DE GACHANCIPA", "segmento": "Oficial", "celdas": 27}, {"nombre": "ALCALDIA MUNICIPAL DE GRANADA", "segmento": "Oficial", "celdas": 27}, {"nombre": "MUNICIPIO DE LOS PATIOS", "segmento": "Oficial", "celdas": 27}, {"nombre": "CORPORACION UNIVERSIDAD LIBRE", "segmento": "Corporativo", "celdas": 27}], "ejemplos": [{"nombre": "SEGURIDAD Y VIGILANCIA COLOMBIANA SEVICOL LIMITADA", "segmento": "Corporativo", "base": "Saldos CA", "mes": "mar-25", "valor": 8.178582155999998e+16}, {"nombre": "MUNICIPIO DE LOS CORDOBAS", "segmento": "Oficial", "base": "Depósitos CA", "mes": "ene-24", "valor": 8.171351595999998e+16}, {"nombre": "EMPRESA DE DESARROLLO URBANO", "segmento": "Oficial", "base": "Saldos CA", "mes": "may-24", "valor": 8.1574683e+16}, {"nombre": "MUNICIPIO DE SAN MARTIN", "segmento": "Oficial", "base": "Saldos CC", "mes": "may-24", "valor": 8.118554737e+16}, {"nombre": "MUNICIPIO DE SANTA ROSA DE CABAL", "segmento": "Oficial", "base": "Saldos CA", "mes": "mar-25", "valor": 8.112899965e+16}, {"nombre": "ALCALDIA MUNICIPAL DE LA MESA CUND", "segmento": "Oficial", "base": "Depósitos CA", "mes": "sept-24", "valor": 8.09329801e+16}, {"nombre": "MUNICIPIO DE LA JAGUA DE IBIRICO", "segmento": "Oficial", "base": "Saldos CA", "mes": "sept-23", "valor": 8.0906792e+16}, {"nombre": "E.S.E DPTAL DE PRIMER NIVEL MORENO Y CLAVIJO", "segmento": "Oficial", "base": "Saldos CA", "mes": "feb-24", "valor": 8.085412264e+16}, {"nombre": "PAZ BAUTISTA CARLOS ARCESIO", "segmento": "Corporativo", "base": "Depósitos CA", "mes": "jul-24", "valor": 8.043391592e+16}, {"nombre": "MUNICIPIO DE MONTELIBANO", "segmento": "Oficial", "base": "Depósitos CA", "mes": "may-24", "valor": 8.0385726e+16}, {"nombre": "EICE FARO DEL CATATUMBO SAS", "segmento": "Oficial", "base": "Depósitos CC", "mes": "sept-24", "valor": 8.02789e+16}, {"nombre": "MUNICIPIO DE SANTA ROSA DE CABAL", "segmento": "Oficial", "base": "Saldos CA", "mes": "may-25", "valor": 8.022039978e+16}, {"nombre": "CUIDAD LIMPIA DEL HUILA S.A. E.S.P.", "segmento": "Corporativo", "base": "Saldos CA", "mes": "sept-23", "valor": 7.9659e+16}, {"nombre": "MUNICIPIO DE OCAÑA", "segmento": "Oficial", "base": "Saldos CC", "mes": "oct-23", "valor": 7.9648361e+16}, {"nombre": "SALUD VITAL DEL HUILA IPS SAS", "segmento": "Empresarial", "base": "Saldos CC", "mes": "oct-23", "valor": 7.9365e+16}, {"nombre": "ARQUITECTURA Y CONCRETO S.A.S", "segmento": "Corporativo", "base": "Depósitos CC", "mes": "dic-24", "valor": 7.92679e+16}, {"nombre": "PROMADERAS COLOMBIA SAS", "segmento": "Empresarial", "base": "Depósitos CC", "mes": "sept-23", "valor": 7.92009e+16}, {"nombre": "UNIVERSIDAD SANTIAGO DE CALI", "segmento": "Corporativo", "base": "Saldos CA", "mes": "sept-23", "valor": 7.9106864e+16}, {"nombre": "MUNICIPIO DE LOS PATIOS", "segmento": "Oficial", "base": "Depósitos CC", "mes": "mar-24", "valor": 7.88755e+16}, {"nombre": "UNIVERSIDAD DEL CAUCA", "segmento": "Oficial", "base": "Saldos CC", "mes": "may-25", "valor": 7.8561958e+16}], "pct_publico_en_oficial": 73.35902022842988};
+const D={"R": {"total": {"n_empresas_raw": 5035, "filas_raw": 13762, "n_filas_dup_eliminadas": 8727, "n_empresas_analisis": 4903, "n_empresas_excluidas": 132, "comisiones_tot": 392375.65919599996, "saldo_prom_tot": 20217042.178367168, "deposito_prom_tot": 61491026.82464884, "flujo_entrada_tot": 708220681.226137, "flujo_salida_tot": 664403926.427314, "margen_contrib_tot": -1326072.9259652095, "roa_depositos_global": 0.01940816345606943, "velocidad_global": 67.89443260509195, "ifv_global": 0.028546246550390984, "ror_global": 0.00028585795199080664, "n_negocios_cosecha": 13982, "n_empresas_cosecha": 5175, "periodo": "ene-23 a may-25", "n_meses": 29, "FTP": 0.085, "valor_fondeo_tot": 4152917.4141395893, "margen_valor_tot": 4545293.073335589, "pct_comisiones": 8.632571164614758, "pct_fondeo": 91.36742883538524}, "segmentos": {"Corporativo": {"n_empresas": 1413, "comisiones_tot": 287302.270169, "saldo_prom_tot": 2507843.631726985, "deposito_prom_tot": 9810747.141647931, "flujo_entrada_tot": 514164606.96487296, "flujo_salida_tot": 481466423.43018705, "margen_contrib_tot": 74135.56147220626, "roa_depositos": 0.11456147685378378, "velocidad": 397.00682203596375, "ifv": 0.004877511205080511, "ror": 0.00028856299311503007, "valor_fondeo": 515152.8793505848, "margen_valor": 802455.1495195848}, "Empresarial": {"n_empresas": 2585, "comisiones_tot": 79401.358863, "saldo_prom_tot": 531751.0654810143, "deposito_prom_tot": 2383439.0974961426, "flujo_entrada_tot": 98871673.203694, "flujo_salida_tot": 91754150.868687, "margen_contrib_tot": 34202.51829711377, "roa_depositos": 0.14932054492674063, "velocidad": 358.486962127558, "ifv": 0.005378194261823691, "ror": 0.00041652991796563277, "valor_fondeo": 109230.53136755836, "margen_valor": 188631.89023055835}, "Oficial": {"n_empresas": 905, "comisiones_tot": 25672.030164, "saldo_prom_tot": 17177447.48115917, "deposito_prom_tot": 49296840.58550477, "flujo_entrada_tot": 95184401.05757001, "flujo_salida_tot": 91183352.12844001, "margen_contrib_tot": -1434411.0057345293, "roa_depositos": 0.0014945194966922756, "velocidad": 10.849560354669967, "ifv": 0.18046494268288563, "ror": 0.00013774931405851766, "valor_fondeo": 3528534.0034214463, "margen_valor": 3554206.0335854464}}, "monthly": {"meses": ["ene-23", "feb-23", "mar-23", "abr-23", "may-23", "jun-23", "jul-23", "ago-23", "sept-23", "oct-23", "nov-23", "dic-23", "ene-24", "feb-24", "mar-24", "abr-24", "may-24", "jun-24", "jul-24", "ago-24", "sept-24", "oct-24", "nov-24", "dic-24", "ene-25", "feb-25", "mar-25", "abr-25", "may-25"], "flujo_entrada": {"Corporativo": [15165065.204537, 14033791.949441, 15532062.603179, 14143558.18632, 16386048.885443, 15610672.914155, 15339521.962226, 15865386.90246, 17145568.08302, 16994206.675421, 16448031.641964, 18886440.044947002, 16347295.399205, 37032210.064024, 13857322.598683, 16874867.541394, 15851214.952244, 28114109.330673, 43693614.051460005, 14000888.165544, 16813080.376468, 18531821.619763, 17221614.550102, 20494841.119859, 16653722.363135999, 16013745.835919, 18129974.411081, 18093030.452002, 18251950.027359], "Empresarial": [3232159.018297, 3052754.85949, 3398030.943113, 3004343.738549, 3313254.051336, 3556335.461555, 3325033.770633, 3228476.535428, 3171208.68349, 3304994.79265, 3463960.651581, 4015217.715772, 3485261.3856120002, 3288873.732482, 2823695.072704, 3716335.469564, 3440965.8167, 2675365.287361, 3723080.327196, 3175688.076741, 3279489.03548, 3724784.587488, 3226551.595643, 4428232.407525, 3584542.251046, 3225361.095924, 3627479.939223, 3689334.251268, 3690862.649843], "Oficial": [2125699.471445, 2804752.98017, 3284177.9567, 2579694.7210770003, 3009833.5556260003, 2971003.364959, 3531289.892844, 3145279.9521569996, 3141515.03786, 2986619.483701, 3045772.026664, 4458183.578447, 2788362.322283, 4077926.991456, 3026625.0531160003, 4053907.671156, 3516117.028117, 3650721.5023080003, 4917989.666682, 2515234.8382429997, 3264551.349214, 3489677.8862670003, 3214175.223633, 4939066.54108, 3391096.986592, 3226195.49284, 4110505.0584090003, 4102574.016744, 3783533.160404]}, "comisiones_entrada": {"Corporativo": [32.913003, 24.675492000000002, 45.906907, 25.720850000000002, 5.132235, 47.26146200000001, 42.684400000000004, 3.471387, 12.328354, 196.22454399999998, 176.676264, 86.013202, 116.83466, 12.048732, 71.321223, 4877.411005, 322.815675, 3484.417494, 2465.14259, 496.682587, 13.029490000000001, 14.456151, 380.545138, 96.912751, 10.71529, 6.609871, 54.729419, 113.190961, 233.127768], "Empresarial": [4.370717, 66.190493, 3.6119820000000002, 9.201687999999999, 20.469906, 8.394971, 13.098501, 3.781844, 4.450305, 14.820118, 149.199469, 14.017241, 25.572892, 15.801563999999999, 14.184004, 157.767991, 77.89984799999999, 218.836503, 257.787404, 48.760924, 43.923414, 17.662557, 16.51368, 38.40882, 11.723877, 17.734116, 48.685581, 186.45118599999998, 6.091018], "Oficial": [8.847789, 1142.198683, 7.556284, 28.693426000000002, 6.007422, 37.121445, 12.525351, 1.449366, 25.321963999999998, 8.072228, 14.319279, 26.097401, 2.529296, 28.006171, 1.0796810000000001, 20.765282, 58.055483, 443.456822, 129.401851, 6.836066, 32.847416, 6.825837, 23.560186, 104.106307, 18.513167000000003, 12.988563000000001, 51.194227999999995, 18.364562, 40.491228]}, "comisiones_salida": {"Corporativo": [7834.458799, 8414.313165, 8843.602582, 8367.625184, 9116.065212, 9214.36895, 8974.504025, 8743.68801, 8826.005449, 9827.129664, 10067.403249, 8216.734488, 10962.307278999999, 8793.389243, 8131.56451, 15680.030531, 10153.569076, 8943.604837, 10826.629848999999, 6568.623516, 7561.244166, 11907.611299, 9331.862328, 9439.775169, 9302.84515, 7750.50504, 12773.107386, 9632.827627, 9654.044755], "Empresarial": [2493.647153, 2382.650356, 2661.257468, 2272.115722, 2498.681502, 2517.446362, 2401.977816, 2464.337434, 2351.830697, 2760.439467, 2575.666788, 3116.097413, 2828.473407, 2728.390968, 2150.093601, 3364.950625, 2749.579922, 2258.927712, 3176.009146, 2664.115747, 2574.068726, 2736.952415, 2458.905734, 3674.917945, 2616.134222, 2501.420763, 3153.928196, 2944.080137, 2808.848805], "Oficial": [1635.270175, 613.877828, 1197.450403, 811.1140780000001, 690.135852, 613.485755, 627.758944, 590.922876, 629.911078, 746.709124, 631.290397, 881.206902, 649.034393, 745.492645, 740.865705, 1247.078961, 721.468019, 756.4540890000001, 966.0504189999999, 691.630508, 694.973, 872.999704, 578.749219, 1361.1482560000002, 625.037694, 658.91928, 737.333534, 898.576286, 739.852256]}, "saldo_ca": {"Corporativo": [0.012581768656716417, 0.010401709090909091, 0.007449202508960573, 0.03922552846975089, 0.059539003466204506, 4.747354575129534, 5.375353314720812, 4.530878343383584, 44.992374427125505, 50.620135385809306, 37.74159305708245, 60.81841919017094, 223.24216058890698, 239.20597523452767, 481.2937424057971, 6336.475444097086, 4919.159363038217, 285.2264942336, 5570.6475829415485, 2541.9439567453987, 299.29815081942337, 5479.747525687879, 329.4368566998468, 2494.610506472511, 517.9876222850746, 9444.491467135693, 2139.106164182353, 4391.730343612903, 600.5643983328446], "Empresarial": [0.10950429146919431, 0.02481168969555035, 0.010778506880733944, 0.0715425871040724, 0.07309987401574804, 0.6999170326086956, 0.7209362974137932, 0.7272021387711864, 7.0280234468629965, 6.791626934036939, 7.413159483950618, 5.581103867758186, 164.65219360063224, 1152.2086900321576, 678.7306601106515, 945.4657736760847, 264.52519077145706, 610.9769418216056, 278.36678785742, 241.03523050576922, 648.5186128990565, 580.6427149721965, 245.8005820923361, 755.7273572189189, 224.5670375329125, 2625.29187204133, 207.7139491143617, 551.2787199021164, 72.21294007766141], "Oficial": [0.02513301694915254, 0.020884365030674847, 0.004637636778115501, 0.03400167166416791, 0.024031892376681616, 4.274472115666179, 4.364543023188405, 4.78779605994152, 44.46378528571428, 38.944489531598514, 37.328360116451016, 31.06776644288225, 6821.557612866455, 5428.259904418641, 3271.177431750784, 25146.379647819722, 27205.44519456162, 14022.760959478916, 7013.555264738058, 6168.77780649849, 4403.741584764876, 9888.114672061583, 11735.966003359084, 34921.64342570977, 4705.760865040463, 17766.43863753409, 17018.30492585281, 18605.90827423176, 3622.5348622980496]}, "saldo_cc": {"Corporativo": [0.011780901500938084, 0.006985790654205607, 0.0022386607806691447, 0.010710148936170213, 0.01731196231617647, 1.315765131147541, 1.21211428147482, 1.1307030134529148, 11.888603431074765, 11.604285420809248, 11.975795878300802, 12.312781591743118, 1166.162006382171, 8643.658099058563, 4247.4733797703175, 3380.895710053982, 1608.815925455752, 3447.305429497801, 540.2128116789152, 1193.02723554019, 394.0470744659776, 193.05203645103094, 165.60997342942684, 394.1519814872231, 148.35578497011102, 148.49377519188502, 103.53239833023648, 682.1925578817568, 213.21973017413356], "Empresarial": [0.035286577691453935, 0.034774297860669226, 0.006816502428494333, 0.03266828327097809, 0.027174236133122025, 0.28371691449426484, 0.24948980489047373, 0.2686811508577195, 2.3996728951715376, 2.302856948092558, 2.4286702050616484, 3.0063168719898608, 73.24237393905412, 77.20985467166345, 29.114992103018686, 52.243424815078235, 93.5133679034224, 93.57226341231343, 51.43263199582366, 77.01343297627736, 51.789518941416894, 37.11925785416666, 24.959272579847052, 69.50585638080356, 20.4126091096316, 51.75262796376491, 25.37147369576604, 39.11269970893246, 20.623918556660897], "Oficial": [0.008127962209302324, 0.007766133333333333, 0.0032383164005805516, 0.00849714037626628, 0.00848931805157593, 2.243828797752809, 2.320928962184874, 2.2541507656033284, 22.28277956325823, 21.344657309401708, 19.38124342361111, 16.173133254799303, 35188.46838888432, 33863.86811094599, 19071.99106834504, 18042.400504711477, 15006.181141703975, 19803.117343195157, 18543.11286799395, 27224.361668995592, 23899.995191121303, 39764.19790918519, 6204.294612713043, 31405.020135715542, 7114.463699893333, 32253.395478049133, 9562.759201832117, 13366.680811498512, 3289.315696941435]}, "saldo_cdt": {"Corporativo": [0.1263930093457944, 0.11644334745762712, 0.03509849180327869, 0.15514145967741935, 0.23845068749999998, 4.265702611940298, 5.614013369230769, 4.577590427480916, 42.34555147706422, 52.33223592372882, 63.64258868421052, 46.68701396078431, 22.41205154054054, 13.608722252336447, 14.377380657894735, 13.922169362831859, 16.386662816513763, 15.616628457142857, 12.118212284313724, 15.342116733944954, 14.810233261682242, 14.786181324074073, 15.38309175221239, 13.299336850467288, 17.985398560747665, 16.31052719047619, 14.555661307692308, 19.42514253398058, 16.803202537037038], "Empresarial": [0.0012049245283018866, 0.036824582417582415, 0.007552650273224043, 0.031347387283236994, 0.05821643956043956, 1.3600240264550263, 1.2459425274725273, 1.356629081521739, 11.34390283974359, 8.89560030952381, 10.6742453125, 9.591959396226414, 14.436840462025316, 13.869097865384616, 16.74541631125828, 15.664493329032256, 15.33546064516129, 16.115437914473684, 14.604527932885905, 15.228209129870129, 15.304352579617833, 14.480955070063693, 16.676255915584413, 18.77979851020408, 14.076333086666665, 18.1714333, 13.551122952095808, 15.889710301136363, 19.903574918128655], "Oficial": [0.0028256585365853655, 0.004287355555555556, 0.004056673469387755, 0.0040240399999999996, 0.0030398703703703703, 2.0578315344827587, 2.2121721525423728, 2.8956931666666663, 28.506886660377354, 18.913320784313726, 18.011515319148934, 9.843591954545454, 13.005062162162162, 12.706461090909091, 15.993572942857142, 12.110458416666665, 12.195768249999999, 9.322296, 13.60975514893617, 11.1981361875, 13.086660191489361, 9.575361909090908, 16.74255037837838, 14.544598133333333, 21.356638096774194, 17.534730275862067, 16.457150945945944, 16.910117979591835, 17.890646823529412]}}, "cosecha_anio": {"2022": 6, "2023": 4530, "2024": 6577, "2025": 2869}, "cosecha_seg_anio": {"Corporativo": {"2022": 0, "2023": 1778, "2024": 2308, "2025": 973}, "Empresarial": {"2022": 5, "2023": 1761, "2024": 2881, "2025": 1237}, "Oficial": {"2022": 0, "2023": 795, "2024": 1365, "2025": 659}, "Pyme": {"2022": 1, "2023": 195, "2024": 20, "2025": 0}}, "cosecha_producto": {"Disfon": 3702, "Ach Recibidas": 2416, "Tarjeta Credito": 1306, "Adquirencia": 1008, "Portal Corporate": 706, "Barras": 512, "Corresponsales Bancarios": 412, "SNR": 402, "Tarjeta de Crédito": 399, "Portal Negocios": 355, "Rotativo": 289, "Giros": 270}, "cosecha_seg": {"Empresarial": 5884, "Corporativo": 5059, "Oficial": 2819, "Pyme": 216}, "tcac_negocios": 0.4518763796909493, "impacto_activacion": {"metodo": "activaciones genuinas (empresa con 1 sola cosecha), ventana 6m pre/post", "n": 991, "pre_prom": 0.3579630107635385, "post_prom": 0.8347226878573832, "variacion_pct": 133.18685527784334, "pct_empresas_mejoran": 11.099899091826437}, "top_empresas": [{"nombre": "EPS SANITAS S.A.S", "segmento": "Corporativo", "comisiones": 53082.70571800001, "saldo": 708750.4532034788, "roa": 0.0748961859256268, "velocidad": 81.73018005466535, "margen": -7161.082804295693}, {"nombre": "COMUNICACION CELULAR SA COMCEL SA", "segmento": "Corporativo", "comisiones": 52848.327115, "saldo": 24.14320382142857, "roa": 2188.952531150562, "velocidad": 679457.4349795779, "margen": 52846.274942675176}, {"nombre": "MERCADOPAGO COLOMBIA LTDA", "segmento": "Corporativo", "comisiones": 13429.075845000001, "saldo": 103.05770231034482, "roa": 130.3063773395616, "velocidad": 120005.65182500254, "margen": 13420.315940303622}, {"nombre": "KOPPS COMMERCIAL S.A.S.", "segmento": "Corporativo", "comisiones": 7387.591297999999, "saldo": 42.86438996551724, "roa": 172.34798638084044, "velocidad": 299517.76437236596, "margen": 7383.94782485293}, {"nombre": "CONSORCIO EMCALI", "segmento": "Oficial", "comisiones": 5578.011572, "saldo": 183.71635507662833, "roa": 30.362084908953285, "velocidad": 218985.386304423, "margen": 5562.395681818487}, {"nombre": "MAC CENTER COLOMBIA S.A.S.", "segmento": "Corporativo", "comisiones": 4898.688433000001, "saldo": 22.10847457142857, "roa": 221.57514382881575, "velocidad": 58234.71318205956, "margen": 4896.80921266143}, {"nombre": "CENTRALES ELECTRICAS DE NARINO SA ESP", "segmento": "Oficial", "comisiones": 4684.875518000001, "saldo": 2401.643006038462, "roa": 1.9506960469232093, "velocidad": 905.6997938611054, "margen": 4480.735862486731}, {"nombre": "TPAGA SAS", "segmento": "Corporativo", "comisiones": 4628.6042099999995, "saldo": 36.60151385714286, "roa": 126.45936526192939, "velocidad": 76535.54727685991, "margen": 4625.493081322143}, {"nombre": "FIDEICOMISO GH BOGOTA-FIDUBOGOTA", "segmento": "Corporativo", "comisiones": 4418.65702, "saldo": 59.375772201780975, "roa": 74.41851880231145, "velocidad": 15335.830866511025, "margen": 4413.610079362848}, {"nombre": "SISTECREDITO S.A.S.", "segmento": "Corporativo", "comisiones": 4402.9584620000005, "saldo": 13.716094793103448, "roa": 321.0067098846415, "velocidad": 212190.7733497427, "margen": 4401.792593942587}, {"nombre": "LA EQUIDAD SEGUROS DE VIDA ORGANISMO COOPERATIVO", "segmento": "Corporativo", "comisiones": 3923.2718689999992, "saldo": 34.48122977777777, "roa": 113.77992879849207, "velocidad": 76476.63639176471, "margen": 3920.340964468888}, {"nombre": "PROMOTORA DE CAFE COLOMBIA S.A.", "segmento": "Corporativo", "comisiones": 3776.6546180000014, "saldo": 11.775432586206895, "roa": 320.72321677793565, "velocidad": 31482.35583092204, "margen": 3775.6537062301736}, {"nombre": "COMERCIALIZADORA NACIONAL SAS LTDA", "segmento": "Corporativo", "comisiones": 3461.801759, "saldo": 13.54139632142857, "roa": 255.64584898249194, "velocidad": 174704.60108418294, "margen": 3460.6507403126784}, {"nombre": "CAJA DE COMPENSACION FAMILIAR DE ANTIOQUIA COMFAMA", "segmento": "Corporativo", "comisiones": 2984.971115, "saldo": 965.6613695451853, "roa": 3.0911157980834263, "velocidad": 9184.746016871686, "margen": 2902.889898588659}, {"nombre": "FINESA S.A. BIC", "segmento": "Corporativo", "comisiones": 2818.866482, "saldo": 64.57136365147784, "roa": 43.65505578006304, "velocidad": 169440.31733521546, "margen": 2813.3779160896243}]}, "L": {"umbral": 10000000000000.0, "por_hoja": {"Depositos CA": {"n_corruptas": 2889, "n_validas": 64862, "empresas_afectadas": 1038}, "Depositos CC": {"n_corruptas": 3022, "n_validas": 112906, "empresas_afectadas": 1450}, "Depositos CDT": {"n_corruptas": 54, "n_validas": 10011, "empresas_afectadas": 37}, "Saldos CDT": {"n_corruptas": 221, "n_validas": 9273, "empresas_afectadas": 143}, "Saldos CA": {"n_corruptas": 4040, "n_validas": 64639, "empresas_afectadas": 1468}, "Saldos CC": {"n_corruptas": 4958, "n_validas": 109830, "empresas_afectadas": 2485}}, "total_corruptas": 15184, "total_validas": 371521, "pct_corrupto": 3.9265072859156205, "filas_dup": 8727}};const R=D.R,L=D.L,T=R.total,S=R.segmentos,IMP=R.impacto_activacion,M=R.monthly;
+const SEG=['Corporativo','Empresarial','Oficial'],SC={Corporativo:'#0A6BD8',Empresarial:'#5B9BE8',Oficial:'#C8A04B'};
+const fM=x=>Math.round(x).toLocaleString('es-CO');
+const fB=x=>(x/1e6).toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fP=(x,d=2)=>x.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d});
+function setChartDefaults(){if(typeof Chart==='undefined')return false;Chart.defaults.color='#94A3B8';Chart.defaults.font.family="'IBM Plex Sans',sans-serif";Chart.defaults.borderColor='#243349';return true;}
+const charts={};
+function mk(id,cfg){if(typeof Chart==='undefined')return;try{if(charts[id])charts[id].destroy();const e=document.getElementById(id);if(e)charts[id]=new Chart(e,cfg);}catch(err){console.warn('chart',id,err);}}
+const pctTip={callbacks:{label:c=>` ${c.dataset.label||c.label}: ${c.parsed.y!=null?fP(c.parsed.y,2):fP(c.parsed,2)}`}};
 
-const FE_ALL={
-  Corporativo:[159000000,154000000,165000000,143000000,164000000,178000000,167000000,161000000,171000000,191000000,167000000,205000000,213000000,172000000,197000000,281000000,278000000,163000000,313000000,240000000,242000000,284000000,226000000,453000000,226000000,235000000,224000000,249000000,229000000],
-  Empresarial:[8900000,8700000,9300000,8100000,9300000,10100000,9400000,9100000,9700000,10800000,9400000,11500000,12000000,9700000,11100000,15800000,15600000,9200000,17600000,13500000,13600000,16000000,12700000,25500000,12700000,13200000,12600000,14000000,12900000],
-  Oficial:[18100630,17908217,18847060,17078989,18582032,21394045,19293882,19198440,20653116,23094764,19599041,23785630,26034649,20851948,23999748,34140088,33721696,19628754,37979022,29260574,29565940,34613498,27045073,53803842,27461244,29259609,27795785,30618261,27901621]
-};
-const FS_ALL={
-  Corporativo:[144900000,139900000,149800000,130200000,149400000,161600000,151900000,146500000,155700000,173800000,151900000,186500000,194000000,156600000,179400000,255900000,253500000,148700000,285500000,218800000,220700000,259000000,206000000,412600000,206000000,214200000,204100000,227000000,208700000],
-  Empresarial:[7500000,7300000,7800000,6800000,7800000,8500000,7900000,7700000,8200000,9100000,7900000,9700000,10100000,8200000,9300000,13300000,13100000,7700000,14800000,11300000,11400000,13400000,10600000,21300000,10600000,11000000,10500000,11600000,10800000],
-  Oficial:[17500000,17300000,18200000,16500000,17900000,20600000,18600000,18500000,19900000,22300000,18900000,22900000,25100000,20100000,23100000,32900000,32400000,18800000,36400000,28000000,28300000,33100000,25900000,51300000,26200000,27900000,26500000,29100000,26600000]
-};
-const CS_ALL={
-  Corporativo:[63000,58900,64900,61100,60200,59800,61000,58700,62100,64200,64500,63600,66800,65700,67700,70500,72600,66700,78300,74200,71100,75100,73900,72000,86200,87100,84300,98000,94500],
-  Empresarial:[8500,7800,8700,8100,7900,7800,7700,7800,8100,8500,8300,8200,8900,8700,9100,9300,9800,8900,10300,9800,9500,10200,9600,9500,9800,9800,9500,10900,10200],
-  Oficial:[4188,3746,3726,3673,3809,3893,3900,3600,4100,4100,4300,4100,4423,4100,4400,4700,4900,4500,5600,5100,4800,4800,5200,4800,5234,5200,4900,5500,5300]
-};
-const SCC_ALL={
-  Corporativo:[50754745,50754745,50754745,50754745,50754745,50754745,50754745,50754745,50754745,50754745,50754745,50754745,27894745,27894745,27894745,27894745,27894745,27894745,27894745,27894745,27894745,27894745,27894745,27894745,11296885,11296885,11296885,11296885,11296885],
-  Empresarial:[21147810,21147810,21147810,21147810,21147810,21147810,21147810,21147810,21147810,21147810,21147810,21147810,11622810,11622810,11622810,11622810,11622810,11622810,11622810,11622810,11622810,11622810,11622810,11622810,4707035,4707035,4707035,4707035,4707035],
-  Oficial:[12688686,12688686,12688686,12688686,12688686,12688686,12688686,12688686,12688686,12688686,12688686,12688686,6973686,6973686,6973686,6973686,6973686,6973686,6973686,6973686,6973686,6973686,6973686,6973686,2824220,2824220,2824220,2824220,2824220]
-};
-const SCA_ALL={
-  Corporativo:[32499579,32499579,32499579,32499579,32499579,32499579,32499579,32499579,32499579,32499579,32499579,32499579,30657883,30657883,30657883,30657883,30657883,30657883,30657883,30657883,30657883,30657883,30657883,30657883,13302005,13302005,13302005,13302005,13302005],
-  Empresarial:[13541491,13541491,13541491,13541491,13541491,13541491,13541491,13541491,13541491,13541491,13541491,13541491,12774117,12774117,12774117,12774117,12774117,12774117,12774117,12774117,12774117,12774117,12774117,12774117,5542502,5542502,5542502,5542502,5542502],
-  Oficial:[8124894,8124894,8124894,8124894,8124894,8124894,8124894,8124894,8124894,8124894,8124894,8124894,7664472,7664472,7664472,7664472,7664472,7664472,7664472,7664472,7664472,7664472,7664472,7664472,3325501,3325501,3325501,3325501,3325501]
-};
+const V={};
+V.resumen=()=>`<div class="head"><div class="crumb">Periodo ${R.total.periodo}</div>
+<h2>Resumen ejecutivo</h2><p>Análisis de desempeño, rentabilidad y reciprocidad de ${fM(T.n_empresas_analisis)} empresas del portafolio de Cash Management, sobre datos depurados. El valor para el banco integra comisiones y el valor del fondeo de los saldos captados.</p></div>
+<div class="cards">
+<div class="card gold"><div class="k">Valor total generado</div><div class="v">$${fB(T.margen_valor_tot)} B</div><div class="s">Comisión <b>${fP(T.pct_comisiones,1)}%</b> · Fondeo <b>${fP(T.pct_fondeo,1)}%</b></div></div>
+<div class="card"><div class="k">Comisiones</div><div class="v">$${fM(T.comisiones_tot)} M</div><div class="s">en ${T.n_meses} meses</div></div>
+<div class="card"><div class="k">Saldo prom. captado</div><div class="v">$${fB(T.saldo_prom_tot)} B</div><div class="s">fondeo vital del área</div></div>
+<div class="card"><div class="k">Empresas analizadas</div><div class="v">${fM(T.n_empresas_analisis)}</div><div class="s">de ${fM(T.n_empresas_raw)} registradas</div></div>
+</div>
+<div class="grid2">
+<div class="panel"><h3><span class="bar"></span>Composición del valor por segmento</h3><div class="sub">Comisiones vs. valor del fondeo (billones COP)</div><div class="chartbox"><canvas id="c_val"></canvas></div></div>
+<div class="panel"><h3><span class="bar"></span>Participación en el fondeo</h3><div class="sub">Saldo promedio captado por segmento</div><div class="chartbox"><canvas id="c_dona"></canvas></div></div>
+</div>
+<div class="panel"><h3><span class="bar"></span>Evolución mensual de comisiones</h3><div class="sub">Comisiones de entrada por segmento (M COP)</div><div class="chartbox"><canvas id="c_evol"></canvas></div>
+<div class="note">El <b>91,4% del valor</b> proviene del fondeo (saldos), no de las comisiones. El segmento <b>Oficial</b>, pese a su bajo ROA por comisión, es la principal fuente de fondeo vital.</div></div>`;
 
-/* ===== HELPERS ===== */
-const ALL_SEGS=['Corporativo','Empresarial','Oficial'];
-const SEG_COLORS={Corporativo:'#58a6ff',Empresarial:'#3fb950',Oficial:'#d29922'};
-const SEG_BG={Corporativo:'rgba(88,166,255,.7)',Empresarial:'rgba(63,185,80,.7)',Oficial:'rgba(210,153,34,.7)'};
+V.rentab=()=>`<div class="head"><div class="crumb">Objetivo 2</div><h2>Rentabilidad por segmento</h2><p>El ROA de Depósitos mide la comisión generada por cada peso de saldo captado. Corporativo y Empresarial son intensivos en comisión; Oficial aporta vía fondeo.</p></div>
+<div class="cards">
+${SEG.map(s=>`<div class="card"><div class="k"><span class="tag ${s.slice(0,4).toLowerCase()}">${s}</span></div><div class="v">${fP(S[s].roa_depositos*100,2)}%</div><div class="s">ROA Depósitos · ${fM(S[s].n_empresas)} empresas</div></div>`).join('')}
+</div>
+<div class="grid2">
+<div class="panel"><h3><span class="bar"></span>ROA de Depósitos</h3><div class="sub">% sobre saldo captado (período)</div><div class="chartbox sm"><canvas id="c_roa"></canvas></div></div>
+<div class="panel"><h3><span class="bar"></span>Velocidad transaccional</h3><div class="sub">Rotación del saldo (flujo/saldo)</div><div class="chartbox sm"><canvas id="c_vel"></canvas></div></div>
+</div>
+<div class="panel"><h3><span class="bar"></span>Detalle por segmento</h3>
+<table><thead><tr><th>Segmento</th><th>Empresas</th><th>Comisiones (M)</th><th>Saldo prom. (M)</th><th>ROA Dep.</th><th>Velocidad</th><th>RoR</th><th>Valor total (B)</th></tr></thead><tbody>
+${SEG.map(s=>`<tr><td><span class="tag ${s.slice(0,4).toLowerCase()}">${s}</span></td><td>${fM(S[s].n_empresas)}</td><td>${fM(S[s].comisiones_tot)}</td><td>${fM(S[s].saldo_prom_tot)}</td><td>${fP(S[s].roa_depositos*100,2)}%</td><td>${fP(S[s].velocidad,1)}</td><td>${fP(S[s].ror*100,4)}%</td><td>$${fB(S[s].margen_valor)}</td></tr>`).join('')}
+</tbody></table></div>`;
 
-function arrSum(a){return a.reduce((x,y)=>x+y,0);}
-function sumSeg(obj,segs){return MONTHS.map((_,i)=>segs.reduce((a,s)=>a+(obj[s]?obj[s][i]:0),0));}
-function fmt(v){
-  if(v>=1e9) return '$'+(v/1e9).toFixed(1)+'B';
-  if(v>=1e6) return '$'+(v/1e6).toFixed(1)+'M';
-  if(v>=1e3) return '$'+(v/1e3).toFixed(0)+'K';
-  return v.toFixed(2);
+V.recipro=()=>`<div class="head"><div class="crumb">Objetivo 3</div><h2>Reciprocidad y fondeo vital</h2><p>La reciprocidad mide el saldo y depósito que las empresas mantienen como contrapartida de los servicios. El IFV indica qué proporción del flujo permanece como saldo.</p></div>
+<div class="cards">
+<div class="card gold"><div class="k">Saldo prom. total</div><div class="v">$${fB(T.saldo_prom_tot)} B</div><div class="s">fondeo del portafolio</div></div>
+<div class="card"><div class="k">IFV global</div><div class="v">${fP(T.ifv_global,4)}</div><div class="s">saldo / flujo de entrada</div></div>
+<div class="card"><div class="k">Depósito prom. total</div><div class="v">$${fB(T.deposito_prom_tot)} B</div><div class="s">CA + CC + CDT</div></div>
+</div>
+<div class="grid2">
+<div class="panel"><h3><span class="bar"></span>Índice de Fondeo Vital por segmento</h3><div class="sub">Permanencia del recurso</div><div class="chartbox sm"><canvas id="c_ifv"></canvas></div></div>
+<div class="panel"><h3><span class="bar"></span>Evolución del saldo en cuenta corriente</h3><div class="sub">Saldo promedio mensual (M COP)</div><div class="chartbox sm"><canvas id="c_saldo"></canvas></div></div>
+</div>
+<div class="note">El segmento <b>Oficial</b> presenta el IFV más alto (${fP(S.Oficial.ifv,3)}), señal de que su recurso permanece mucho más tiempo: es fondeo estable. Corporativo y Empresarial rotan su saldo rápidamente (IFV bajo, alta transaccionalidad).</div>`;
+
+V.negocios=()=>`<div class="head"><div class="crumb">Objetivo 4</div><h2>Negocios ganados (cosechas)</h2><p>Captación de nuevos negocios por año. La tasa de crecimiento 2023–2024 fue del ${fP(R.tcac_negocios*100,1)}%.</p></div>
+<div class="cards">
+${Object.entries(R.cosecha_anio).filter(([a])=>a>='2023').map(([a,v])=>`<div class="card"><div class="k">${a}${a==='2025'?' (parcial)':''}</div><div class="v">${fM(v)}</div><div class="s">negocios ganados</div></div>`).join('')}
+<div class="card gold"><div class="k">TCAC 23–24</div><div class="v">${fP(R.tcac_negocios*100,1)}%</div><div class="s">crecimiento anual</div></div>
+</div>
+<div class="grid2">
+<div class="panel"><h3><span class="bar"></span>Negocios por año</h3><div class="chartbox sm"><canvas id="c_cos"></canvas></div></div>
+<div class="panel"><h3><span class="bar"></span>Productos más captados</h3><div class="chartbox sm"><canvas id="c_prod"></canvas></div></div>
+</div>`;
+
+V.impacto=()=>`<div class="head"><div class="crumb">Objetivo 1</div><h2>Impacto de la activación</h2><p>Comisión media mensual antes y después de activar, en activaciones genuinas (empresas con un único negocio). n = ${fM(IMP.n)}.</p></div>
+<div class="cards">
+<div class="card"><div class="k">Antes (6 meses)</div><div class="v">${fP(IMP.pre_prom,3)}</div><div class="s">comisión media mensual (M)</div></div>
+<div class="card"><div class="k">Después (6 meses)</div><div class="v">${fP(IMP.post_prom,3)}</div><div class="s">comisión media mensual (M)</div></div>
+<div class="card gold"><div class="k">Variación</div><div class="v">+${fP(IMP.variacion_pct,0)}%</div><div class="s">incremento tras activar</div></div>
+</div>
+<div class="panel"><h3><span class="bar"></span>Comisión media: antes vs. después</h3><div class="chartbox"><canvas id="c_imp"></canvas></div>
+<div class="note"><b>Lectura con cautela causal:</b> el aumento es consistente con un efecto positivo de la activación, pero no constituye una estimación causal —las empresas que se vinculan pueden estar en fase de expansión (endogeneidad). Ver reflexión crítica en el informe.</div></div>`;
+
+V.kpis=()=>`<div class="head"><div class="crumb">Objetivo 5</div><h2>Indicadores (KPIs)</h2><p>Seis indicadores que sustentan el análisis, cada uno asociado a una dimensión del objetivo general.</p></div>
+${[['ROA de Depósitos','Comisiones / Saldo promedio captado','Rentabilidad por comisión de cada peso de saldo. Adapta el ROA tradicional al negocio.'],
+['Margen de valor','Comisiones + (Saldo × FTP/12 × meses)','Integra comisión y valor del fondeo (saldo que sustituye fondeo de mercado).'],
+['Índice de Fondeo Vital','Saldo promedio / Flujo de entrada','Proporción del flujo que permanece como saldo. Mide reciprocidad estable.'],
+['Velocidad Transaccional','Flujo total / Saldo promedio','Rotación del saldo (adaptación de MV=PQ de Fisher).'],
+['Return on Relationship','Comisiones / Flujo total','Comisión efectiva por peso movilizado (tarifa relacional implícita).'],
+['TCAC negocios','(Negocios t+1 / Negocios t)^(1/n) − 1','Ritmo de captación de nuevos negocios entre años.']]
+.map(k=>`<div class="kpi-def"><div class="nm">${k[0]}</div><div class="fx">${k[1]}</div><div class="ds">${k[2]}</div></div>`).join('')}`;
+
+V.limpieza=()=>`<div class="head"><div class="crumb">Segunda parte</div><h2>Limpieza de datos</h2><p>Documentación del proceso de depuración. Los datos corruptos se identificaron y excluyeron a nivel de celda, sin descartar empresas completas.</p></div>
+<div class="cards">
+<div class="card"><div class="k">Filas duplicadas</div><div class="v">${fM(L.filas_dup)}</div><div class="s">eliminadas</div></div>
+<div class="card"><div class="k">Celdas corruptas</div><div class="v">${fM(L.total_corruptas)}</div><div class="s"><span class="flag">${fP(L.pct_corrupto,2)}% del total</span></div></div>
+<div class="card"><div class="k">Celdas válidas</div><div class="v">${fM(L.total_validas)}</div><div class="s"><span class="flag ok">conservadas</span></div></div>
+<div class="card"><div class="k">Umbral corrupción</div><div class="v">10¹³</div><div class="s">COP / empresa-mes</div></div>
+</div>
+<div class="panel"><h3><span class="bar"></span>Celdas corruptas por base</h3><div class="sub">Valores &gt; 10¹³ COP, imposibles económicamente</div>
+<table><thead><tr><th>Base</th><th>Celdas válidas</th><th>Celdas corruptas</th><th>Empresas afectadas</th></tr></thead><tbody>
+${Object.entries(L.por_hoja).map(([k,v])=>`<tr><td>${k}</td><td>${fM(v.n_validas)}</td><td>${fM(v.n_corruptas)}</td><td>${fM(v.empresas_afectadas)}</td></tr>`).join('')}
+</tbody></table>
+<div class="note">El criterio de limpieza <b>a nivel de celda</b> (anular solo el valor corrupto y promediar los meses válidos) permitió conservar ${fM(T.n_empresas_analisis)} de ${fM(T.n_empresas_raw)} empresas, en lugar de descartar empresas completas.</div></div>
+<div class="grid2">
+<div class="panel"><h3><span class="bar"></span>Datos corruptos por segmento</h3><div class="sub">Concentración de celdas erróneas</div><div class="chartbox sm"><canvas id="c_corrseg"></canvas></div>
+<div class="note">El <b>${fP(CR.pct_publico_en_oficial,1)}%</b> de los datos corruptos del segmento Oficial corresponde a entidades públicas (municipios, alcaldías, ESE). Posible origen: proceso de carga de cuentas oficiales.</div></div>
+<div class="panel"><h3><span class="bar"></span>Empresas más afectadas</h3><div class="sub">Mayor número de celdas corruptas</div>
+<table><thead><tr><th>Empresa</th><th>Segmento</th><th>Celdas</th></tr></thead><tbody>
+${CR.top_empresas.slice(0,10).map(e=>`<tr><td>${e.nombre}</td><td><span class="tag ${e.segmento.slice(0,4).toLowerCase()}">${e.segmento}</span></td><td>${e.celdas}</td></tr>`).join('')}
+</tbody></table></div></div>
+<div class="panel"><h3><span class="bar"></span>Ejemplos de valores corruptos</h3><div class="sub">Saldos de magnitud imposible (decenas de miles de billones COP en un solo mes)</div>
+<table><thead><tr><th>Empresa</th><th>Segmento</th><th>Base</th><th>Mes</th><th>Valor (COP)</th></tr></thead><tbody>
+${CR.ejemplos.slice(0,12).map(e=>`<tr><td>${e.nombre}</td><td><span class="tag ${e.segmento.slice(0,4).toLowerCase()}">${e.segmento}</span></td><td>${e.base}</td><td>${e.mes}</td><td>${e.valor.toExponential(2)}</td></tr>`).join('')}
+</tbody></table>
+<div class="note">El detalle completo de las <b>${fM(CR.total)} celdas corruptas</b> se entrega como anexo en Excel independiente, para su rastreo y depuración por el área.</div></div>`;
+
+V.individual=()=>`<div class="head"><div class="crumb">Objetivo 4</div><h2>Comparación a nivel individual</h2><p>Perfiles diferenciados de aporte de valor empresa por empresa. Confirma la división de roles: unos clientes aportan fondeo (saldo), otros comisión (transaccionalidad).</p></div>
+<div class="grid2">
+<div class="panel"><h3><span class="bar"></span>Mayores generadores de valor total</h3><div class="sub">Comisión + valor del fondeo · dominado por aportantes de fondeo</div>
+<table><thead><tr><th>Empresa</th><th>Seg.</th><th>Valor (B)</th><th>Saldo (B)</th><th>Comis. (M)</th></tr></thead><tbody>
+${CI.top_valor.slice(0,8).map(c=>`<tr><td>${c.nombre}</td><td><span class="tag ${c.segmento.slice(0,4).toLowerCase()}">${c.segmento.slice(0,4)}</span></td><td>$${fB(c.valor)}</td><td>$${fB(c.saldo)}</td><td>${fM(c.comisiones)}</td></tr>`).join('')}
+</tbody></table></div>
+<div class="panel"><h3><span class="bar"></span>Mayores generadores por comisión</h3><div class="sub">Alta transaccionalidad · aportantes de comisión</div>
+<table><thead><tr><th>Empresa</th><th>Seg.</th><th>Comis. (M)</th><th>Saldo (M)</th><th>RoR</th><th>Velocidad</th></tr></thead><tbody>
+${CI.top_comisiones.slice(0,8).map(c=>`<tr><td>${c.nombre}</td><td><span class="tag ${c.segmento.slice(0,4).toLowerCase()}">${c.segmento.slice(0,4)}</span></td><td>${fM(c.comisiones)}</td><td>${fM(c.saldo)}</td><td>${fP(c.ror*100,4)}%</td><td>${fM(c.vel)}</td></tr>`).join('')}
+</tbody></table>
+<div class="note" style="margin-top:12px">Para este perfil, el <b>ROA de Depósitos no aplica</b>: retienen muy poco saldo. Su valor está en la transaccionalidad, medida por el <b>RoR</b> (comisión/flujo) y la <b>velocidad</b> (rotación del saldo).</div></div></div>
+<div class="panel"><h3><span class="bar"></span>Mapa de perfiles: saldo vs. comisión</h3><div class="sub">Cada punto es una empresa destacada. Eje X: saldo (fondeo); Eje Y: comisiones</div><div class="chartbox"><canvas id="c_scatter"></canvas></div>
+<div class="note">Los dos arquetipos son claros: <b>aportantes de fondeo</b> (alto saldo, baja comisión — típicamente Oficial) y <b>aportantes de comisión</b> (alta comisión, saldo bajo — Corporativo/Empresarial). La rentabilidad del área no se juzga con una sola métrica.</div></div>`;
+
+function draw(v){
+ if(v==='individual'){
+  const pts=(arr,col)=>arr.map(c=>({x:c.saldo/1e6,y:c.comisiones,nombre:c.nombre}));
+  mk('c_scatter',{type:'scatter',data:{datasets:[
+   {label:'Top por valor (fondeo)',data:pts(CI.top_valor),backgroundColor:'#C8A04B',pointRadius:7},
+   {label:'Top por comisión',data:pts(CI.top_comisiones),backgroundColor:'#0A6BD8',pointRadius:7}]},
+   options:{maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Saldo promedio (billones COP)'}},y:{title:{display:true,text:'Comisiones (M COP)'},type:'logarithmic'}},
+   plugins:{tooltip:{callbacks:{label:c=>c.raw.nombre+': saldo $'+fP(c.raw.x,2)+'B, com '+fM(c.raw.y)+'M'}}}}});
+ }
+ if(v==='limpieza'){
+  const segs=['Corporativo','Empresarial','Oficial'];
+  mk('c_corrseg',{type:'bar',data:{labels:segs,datasets:[{label:'Celdas corruptas',data:segs.map(s=>CR.por_segmento[s]||0),backgroundColor:segs.map(s=>SC[s])}]},
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fM(c.parsed.y)+' celdas'}}}}});
+ }
+ if(v==='resumen'){
+  mk('c_val',{type:'bar',data:{labels:SEG,datasets:[
+   {label:'Comisiones',data:SEG.map(s=>S[s].comisiones_tot/1e6),backgroundColor:'#0A6BD8'},
+   {label:'Valor del fondeo',data:SEG.map(s=>S[s].valor_fondeo/1e6),backgroundColor:'#C8A04B'}]},
+   options:{maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'Billones COP'}}},plugins:{tooltip:{callbacks:{label:c=>` ${c.dataset.label}: $${fP(c.parsed.y,2)} B`}}}}});
+  mk('c_dona',{type:'doughnut',data:{labels:SEG,datasets:[{data:SEG.map(s=>S[s].saldo_prom_tot/1e6),backgroundColor:SEG.map(s=>SC[s]),borderColor:'#121C2E',borderWidth:2}]},
+   options:{maintainAspectRatio:false,cutout:'58%',plugins:{tooltip:{callbacks:{label:c=>` ${c.label}: $${fP(c.parsed,2)} B (${fP(100*c.parsed/SEG.reduce((a,s)=>a+S[s].saldo_prom_tot/1e6,0),1)}%)`}}}}});
+  mk('c_evol',{type:'line',data:{labels:M.meses,datasets:SEG.filter(s=>M.comisiones_entrada[s]).map(s=>({label:s,data:M.comisiones_entrada[s],borderColor:SC[s],backgroundColor:'transparent',tension:.3,pointRadius:0,borderWidth:2}))},
+   options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{maxTicksLimit:12}},y:{title:{display:true,text:'M COP'}}}}});
+ }
+ if(v==='rentab'){
+  mk('c_roa',{type:'bar',data:{labels:SEG,datasets:[{label:'ROA Dep. (%)',data:SEG.map(s=>S[s].roa_depositos*100),backgroundColor:SEG.map(s=>SC[s])}]},
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fP(c.parsed.y,2)}%`}}},scales:{y:{title:{display:true,text:'%'}}}}});
+  mk('c_vel',{type:'bar',data:{labels:SEG,datasets:[{label:'Velocidad',data:SEG.map(s=>S[s].velocidad),backgroundColor:SEG.map(s=>SC[s])}]},
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fP(c.parsed.y,1)} rotaciones`}}}}});
+ }
+ if(v==='recipro'){
+  mk('c_ifv',{type:'bar',data:{labels:SEG,datasets:[{label:'IFV',data:SEG.map(s=>S[s].ifv),backgroundColor:SEG.map(s=>SC[s])}]},
+   options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` IFV: ${fP(c.parsed.x,4)}`}}}}});
+  mk('c_saldo',{type:'line',data:{labels:M.meses,datasets:SEG.filter(s=>M.saldo_cc[s]).map(s=>({label:s,data:M.saldo_cc[s].map(x=>x/1e6),borderColor:SC[s],backgroundColor:'transparent',tension:.3,pointRadius:0,borderWidth:2}))},
+   options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{maxTicksLimit:10}},y:{title:{display:true,text:'M COP'}}}}});
+ }
+ if(v==='negocios'){
+  mk('c_cos',{type:'bar',data:{labels:Object.keys(R.cosecha_anio).filter(a=>a>='2023'),datasets:[{label:'Negocios',data:Object.entries(R.cosecha_anio).filter(([a])=>a>='2023').map(([,v])=>v),backgroundColor:'#0A6BD8'}]},
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  const pr=Object.entries(R.cosecha_producto).slice(0,8);
+  mk('c_prod',{type:'bar',data:{labels:pr.map(p=>p[0]),datasets:[{data:pr.map(p=>p[1]),backgroundColor:'#C8A04B'}]},
+   options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}}}});
+ }
+ if(v==='impacto'){
+  mk('c_imp',{type:'bar',data:{labels:['Antes (6m)','Después (6m)'],datasets:[{data:[IMP.pre_prom,IMP.post_prom],backgroundColor:['#595959','#2DD4A7']}]},
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fP(c.parsed.y,3)} M COP`}}},scales:{y:{title:{display:true,text:'Comisión media mensual (M)'}}}}});
+ }
 }
-
-/* ===== STATE ===== */
-let activeSeg='Todos';
-let currentPage='overview';
-
-function getSegs(){return activeSeg==='Todos'?ALL_SEGS:[activeSeg];}
-function getFE(){return sumSeg(FE_ALL,getSegs());}
-function getFS(){return sumSeg(FS_ALL,getSegs());}
-function getCS(){return sumSeg(CS_ALL,getSegs());}
-function getSCC(){return sumSeg(SCC_ALL,getSegs());}
-function getSCA(){return sumSeg(SCA_ALL,getSegs());}
-
-/* ===== NAVIGATION ===== */
-const PAGE_TITLES={
-  overview:'Visión general del portafolio',
-  rentabilidad:'Análisis de rentabilidad',
-  cosechas:'Negocios ganados — Cosechas 2023–2025',
-  reciprocidad:'Reciprocidad y saldos',
-  roa:'KPI: ROA de depósitos',
-  ror:'KPI: Return on Relationship',
-  fondeo:'KPI: Índice de fondeo vital',
-  velocidad:'KPI: Velocidad del dinero',
-  clientes:'Top clientes del portafolio',
-  maestro:'Cuadro maestro de KPIs'
-};
-
-function goTo(id,el){
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
-  document.getElementById('page-'+id).classList.add('active');
-  el.classList.add('active');
-  document.getElementById('page-title').textContent=PAGE_TITLES[id]||id;
-  currentPage=id;
-  destroyAll();
-  refreshPage(id);
-}
-
-/* ===== SEGMENT FILTER ===== */
-function setSeg(seg,el){
-  activeSeg=seg;
-  document.querySelectorAll('.seg-pill').forEach(function(p){p.classList.remove('on');});
-  el.classList.add('on');
-  var ind=document.getElementById('seg-indicator');
-  if(seg==='Todos'){
-    ind.classList.remove('show');
-  } else {
-    ind.textContent='Mostrando: '+seg;
-    ind.classList.add('show');
-  }
-  destroyAll();
-  refreshPage(currentPage);
-}
-
-/* ===== CHART REGISTRY ===== */
-var CI={};
-function destroyAll(){
-  Object.keys(CI).forEach(function(k){
-    if(CI[k]){try{CI[k].destroy();}catch(e){}}
-    delete CI[k];
-  });
-}
-function mk(id,cfg){
-  if(CI[id]){try{CI[id].destroy();}catch(e){}}
-  var el=document.getElementById(id);
-  if(!el)return;
-  CI[id]=new Chart(el,cfg);
-}
-
-/* ===== CHART DEFAULTS ===== */
-var baseOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},animation:{duration:500}};
-
-function xT(){
-  return {
-    ticks:{font:{size:9},maxRotation:45,autoSkip:false,color:'#8b949e'},
-    grid:{color:'rgba(48,54,61,.8)'}
-  };
-}
-function yT(cb){
-  return {
-    ticks:{font:{size:9},color:'#8b949e',callback:cb||function(v){return fmt(v);}},
-    grid:{color:'rgba(48,54,61,.8)'}
-  };
-}
-
-/* ===== KPI CARDS ===== */
-function buildKPI(containerId,cards){
-  var el=document.getElementById(containerId);
-  if(!el)return;
-  el.innerHTML=cards.map(function(c){
-    return '<div class="kpi">'
-      +'<div class="kpi-lbl">'+c.lbl+'</div>'
-      +'<div class="kpi-val">'+c.val+'</div>'
-      +'<div class="kpi-footer"><span class="'+(c.dir||'neutral')+'">'+( c.delta||'')+'</span>'+(c.sub?'<span class="neutral">'+c.sub+'</span>':'')+'</div>'
-      +'<div class="kpi-bar"><div class="kpi-fill" style="width:'+(c.w||50)+'%;background:'+(c.color||'var(--blue)')+'"></div></div>'
-      +'</div>';
-  }).join('');
-}
-
-/* ===== PAGE REFRESH ===== */
-function refreshPage(id){
-  var segs=getSegs();
-  var fe=getFE(), fs=getFS(), cs=getCS(), scc=getSCC(), sca=getSCA();
-  var fn=fe.map(function(v,i){return v-fs[i];});
-  var roa=cs.map(function(c,i){var d=sca[i]+scc[i];return d>0?parseFloat((c/d*100).toFixed(4)):0;});
-  var vel=fe.map(function(f,i){var d=sca[i]+scc[i];return d>0?parseFloat((f/d).toFixed(3)):0;});
-  var ret=fe.map(function(f,i){var d=sca[i]+scc[i];return f>0?parseFloat((d/f).toFixed(4)):0;});
-
-  var fe23=arrSum(fe.slice(0,12)), fe24=arrSum(fe.slice(12,24)), fe25=arrSum(fe.slice(24));
-  var cs23=arrSum(cs.slice(0,12)), cs24=arrSum(cs.slice(12,24)), cs25=arrSum(cs.slice(24));
-  var scc23=arrSum(scc.slice(0,12))/12, sca23=arrSum(sca.slice(0,12))/12;
-  var scc24=arrSum(scc.slice(12,24))/12, sca24=arrSum(sca.slice(12,24))/12;
-  var scc25=arrSum(scc.slice(24))/scc.slice(24).length, sca25=arrSum(sca.slice(24))/sca.slice(24).length;
-
-  var segLabel=activeSeg==='Todos'?'todos los segmentos':activeSeg;
-
-  /* ---- OVERVIEW ---- */
-  if(id==='overview'){
-    buildKPI('kpi-overview',[
-      {lbl:'Comisiones totales',val:fmt(cs23+cs24+cs25),delta:'↑ +'+((cs24/cs23-1)*100).toFixed(1)+'%',dir:'up',sub:'2023→2024',w:68,color:'var(--blue)'},
-      {lbl:'Flujos entrada acum.',val:fmt(fe23+fe24+fe25),delta:'↑ +'+((fe24/fe23-1)*100).toFixed(1)+'%',dir:'up',sub:'2023→2024',w:82,color:'var(--green)'},
-      {lbl:'Flujo neto acum.',val:fmt(arrSum(fn)),delta:'↑ Positivo',dir:'up',w:60,color:'var(--amber)'},
-      {lbl:'Saldo prom. dep. 2024',val:fmt(scc24+sca24),delta:((( scc24+sca24)/(scc23+sca23)-1)*100).toFixed(1)+'%',dir:(scc24+sca24)>=(scc23+sca23)?'up':'dn',sub:'vs 2023',w:50,color:'var(--purple)'}
-    ]);
-    var lbl=document.getElementById('lbl-fe-time');
-    if(lbl) lbl.textContent=segLabel+' · MM COP';
-
-    mk('ch-fe-time',{type:'line',data:{labels:MONTHS,datasets:[
-      {label:'Flujos entrada',data:fe,borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.06)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5},
-      {label:'Flujos salida',data:fs,borderColor:'#f85149',backgroundColor:'rgba(248,81,73,.04)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5},
-      {label:'Flujo neto',data:fn,borderColor:'#3fb950',backgroundColor:'rgba(63,185,80,.04)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5,borderDash:[4,3]}
-    ]},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){return c.dataset.label+': '+fmt(c.parsed.y);}}}},
-      scales:{x:xT(),y:yT()}
-    })});
-
-    mk('ch-donut',{type:'doughnut',data:{
-      labels:['Corporativo','Empresarial','Oficial'],
-      datasets:[{data:[5059,5884,2819],backgroundColor:['#58a6ff','#3fb950','#d29922'],borderWidth:0,hoverOffset:4}]
-    },options:Object.assign({},baseOpts,{
-      cutout:'68%',
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.parsed.toLocaleString()+' ('+((c.parsed/13762)*100).toFixed(1)+'%)';}}}},
-      animation:{duration:500}
-    })});
-
-    var csYr={Corporativo:[774460,859548,467693],Empresarial:[81242,101049,43628],Oficial:[38124,40857,15095]};
-    mk('ch-com-seg',{type:'bar',data:{labels:['2023','2024','2025(ytd)'],datasets:segs.map(function(s){
-      return {label:s,data:csYr[s],backgroundColor:SEG_BG[s],borderRadius:3,barPercentage:.65};
-    })},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
-        var all=ALL_SEGS.reduce(function(a,s){return a+csYr[s][c.dataIndex];},0);
-        return c.dataset.label+': '+fmt(c.parsed.y)+' · '+((c.parsed.y/all)*100).toFixed(1)+'% total';
-      }}}},
-      scales:{x:xT(),y:yT()}
-    })});
-
-    var feYr={Corporativo:[1909429331,5362426250,1137159553],Empresarial:[112862853,125532506,56113242],Oficial:[558046269,598125254,178562725]};
-    mk('ch-fe-seg',{type:'bar',data:{labels:['2023','2024','2025(ytd)'],datasets:segs.map(function(s){
-      return {label:s,data:feYr[s],backgroundColor:SEG_BG[s],borderRadius:3,barPercentage:.65};
-    })},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
-        var all=ALL_SEGS.reduce(function(a,s){return a+feYr[s][c.dataIndex];},0);
-        return c.dataset.label+': '+fmt(c.parsed.y)+' · '+((c.parsed.y/all)*100).toFixed(1)+'% total';
-      }}}},
-      scales:{x:xT(),y:yT()}
-    })});
-
-    var negTotals=[4534,6574,2869];
-    mk('ch-neg-yr',{type:'bar',data:{labels:['2023','2024','2025(ytd)'],datasets:[{
-      data:negTotals,
-      backgroundColor:['rgba(188,140,255,.6)','#bc8cff','rgba(188,140,255,.45)'],borderRadius:4
-    }]},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){
-        var prev=c.dataIndex>0?negTotals[c.dataIndex-1]:null;
-        var chg=prev?' · '+((c.parsed.y/prev-1)*100).toFixed(1)+'% vs anterior':'';
-        return 'Negocios: '+c.parsed.y.toLocaleString()+chg;
-      }}}},
-      scales:{x:xT(),y:yT(function(v){return v.toLocaleString();})}
-    })});
-
-    mk('ch-com-seg-monthly',{type:'line',data:{labels:MONTHS,datasets:segs.map(function(s){
-      return {label:s,data:CS_ALL[s],borderColor:SEG_COLORS[s],tension:.4,pointRadius:0,borderWidth:1.5};
-    })},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
-        var tot=segs.reduce(function(a,s){return a+(CS_ALL[s][c.dataIndex]||0);},0);
-        return c.dataset.label+': '+fmt(c.parsed.y)+' · '+((c.parsed.y/tot)*100).toFixed(0)+'%';
-      }}}},
-      scales:{x:xT(),y:yT()}
-    })});
-  }
-
-  /* ---- RENTABILIDAD ---- */
-  if(id==='rentabilidad'){
-    buildKPI('kpi-rentabilidad',[
-      {lbl:'Comisiones 2023',val:fmt(cs23),delta:'Año base',dir:'neutral',w:58,color:'var(--blue)'},
-      {lbl:'Comisiones 2024',val:fmt(cs24),delta:'↑ +'+((cs24/cs23-1)*100).toFixed(1)+'%',dir:'up',w:65,color:'var(--blue)'},
-      {lbl:'Comisiones 2025 (5m)',val:fmt(cs25),delta:'↑ proy. '+fmt(cs25/5*12),dir:'up',w:82,color:'var(--blue)'},
-      {lbl:'TCAC comisiones',val:'+18.7%',delta:'↑ Compuesto anual',dir:'up',w:74,color:'var(--green)'}
-    ]);
-    var lbl2=document.getElementById('lbl-rent');
-    if(lbl2) lbl2.textContent=segLabel+' · COP';
-
-    mk('ch-rent-monthly',{type:'line',data:{labels:MONTHS,datasets:segs.map(function(s){
-      return {label:s,data:CS_ALL[s],borderColor:SEG_COLORS[s],tension:.4,pointRadius:0,borderWidth:1.5};
-    })},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
-        var tot=segs.reduce(function(a,s){return a+(CS_ALL[s][c.dataIndex]||0);},0);
-        return c.dataset.label+': '+fmt(c.parsed.y)+' · '+((c.parsed.y/tot)*100).toFixed(0)+'%';
-      }}}},
-      scales:{x:xT(),y:yT()}
-    })});
-
-    var csYrR={Corporativo:[774460,859548,467693],Empresarial:[81242,101049,43628],Oficial:[38124,40857,15095]};
-    var allCom24=ALL_SEGS.reduce(function(a,s){return a+csYrR[s][1];},0);
-    mk('ch-rent-pie',{type:'doughnut',data:{
-      labels:['Corp. 85.8%','Emp. 10.1%','Ofic. 4.1%'],
-      datasets:[{data:segs.map(function(s){return csYrR[s][1];}),backgroundColor:segs.map(function(s){return SEG_COLORS[s];}),borderWidth:0,hoverOffset:4}]
-    },options:Object.assign({},baseOpts,{
-      cutout:'65%',
-      plugins:{legend:{position:'right',labels:{color:'#8b949e',font:{size:10},boxWidth:9,padding:6}},tooltip:{callbacks:{label:function(c){
-        return c.label+': '+fmt(c.parsed)+' ('+((c.parsed/allCom24)*100).toFixed(1)+'%)';
-      }}}}
-    })});
-
-    var feByYr=[arrSum(fe.slice(0,12)),arrSum(fe.slice(12,24)),arrSum(fe.slice(24))];
-    var fsByYr=[arrSum(fs.slice(0,12)),arrSum(fs.slice(12,24)),arrSum(fs.slice(24))];
-    mk('ch-flujo-neto',{type:'bar',data:{labels:['2023','2024','2025(ytd)'],datasets:[
-      {label:'Entrada',data:feByYr,backgroundColor:'rgba(88,166,255,.7)',borderRadius:3,barPercentage:.5},
-      {label:'Salida',data:fsByYr,backgroundColor:'rgba(248,81,73,.7)',borderRadius:3,barPercentage:.5}
-    ]},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
-        var net=feByYr[c.dataIndex]-fsByYr[c.dataIndex];
-        return c.dataset.label+': '+fmt(c.parsed.y)+' | Neto: '+fmt(net);
-      }}}},
-      scales:{x:xT(),y:yT()}
-    })});
-
-    var tb=document.getElementById('tb-rent');
-    if(tb){
-      var csYrMap={Corporativo:[774460,859548,467693],Empresarial:[81242,101049,43628],Oficial:[38124,40857,15095]};
-      var totAll=ALL_SEGS.reduce(function(a,s){return a+csYrMap[s][1];},0);
-      tb.innerHTML=segs.map(function(s){
-        var d=csYrMap[s];
-        var v=((d[1]/d[0]-1)*100).toFixed(1);
-        var part=((d[1]/totAll)*100).toFixed(1);
-        var badge=s==='Corporativo'?'corp':s==='Empresarial'?'emp':'ofic';
-        return '<tr><td><span class="badge '+badge+'">'+s+'</span></td>'
-          +'<td>$'+d[0].toLocaleString()+'</td><td>$'+d[1].toLocaleString()+'</td><td>$'+d[2].toLocaleString()+'</td>'
-          +'<td class="'+(parseFloat(v)>=0?'up':'dn')+'">'+(parseFloat(v)>=0?'↑':'↓')+Math.abs(v)+'%</td>'
-          +'<td style="color:'+SEG_COLORS[s]+';font-weight:600">'+part+'%</td></tr>';
-      }).join('');
-    }
-  }
-
-  /* ---- COSECHAS ---- */
-  if(id==='cosechas'){
-    var negBySeg={Corporativo:{2023:1778,2024:2308,2025:973},Empresarial:{2023:1761,2024:2881,2025:1237},Oficial:{2023:795,2024:1365,2025:659}};
-    var neg23=segs.reduce(function(a,s){return a+negBySeg[s][2023];},0);
-    var neg24=segs.reduce(function(a,s){return a+negBySeg[s][2024];},0);
-    var neg25=segs.reduce(function(a,s){return a+negBySeg[s][2025];},0);
-    buildKPI('kpi-cosechas',[
-      {lbl:'Negocios 2023',val:neg23.toLocaleString(),delta:'Año base',dir:'neutral',w:55,color:'var(--purple)'},
-      {lbl:'Negocios 2024',val:neg24.toLocaleString(),delta:'↑ +'+((neg24/neg23-1)*100).toFixed(1)+'%',dir:'up',w:80,color:'var(--purple)'},
-      {lbl:'Negocios 2025 (ytd)',val:neg25.toLocaleString(),delta:'↑ proy. ~'+Math.round(neg25/5*12).toLocaleString(),dir:'up',w:88,color:'var(--purple)'},
-      {lbl:'Empresas captadas',val:'5,175',delta:'Portafolio activo',dir:'neutral',w:63,color:'var(--green)'}
-    ]);
-
-    mk('ch-neg-seg',{type:'bar',data:{labels:['2023','2024','2025(ytd)'],datasets:segs.map(function(s){
-      return {label:s,data:[negBySeg[s][2023],negBySeg[s][2024],negBySeg[s][2025]],backgroundColor:SEG_BG[s],borderRadius:3,barPercentage:.65};
-    })},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
-        var allN=ALL_SEGS.reduce(function(a,s){return a+[negBySeg[s][2023],negBySeg[s][2024],negBySeg[s][2025]][c.dataIndex];},0);
-        return c.dataset.label+': '+c.parsed.y.toLocaleString()+' · '+((c.parsed.y/allN)*100).toFixed(1)+'% total';
-      }}}},
-      scales:{x:xT(),y:yT(function(v){return v.toLocaleString();})}
-    })});
-
-    var prodData=[3702,2416,1306,1008,706,512,412,402,399,355,289,270];
-    var prodTotal=prodData.reduce(function(a,b){return a+b;},0);
-    mk('ch-prod',{type:'bar',indexAxis:'y',data:{
-      labels:['Disfon','ACH Recibidas','T.Crédito','Adquirencia','Portal Corp.','Barras','Correspon.','SNR','T.Crédito v2','P.Negocios','Rotativo','Giros'],
-      datasets:[{data:prodData,backgroundColor:'rgba(188,140,255,.75)',borderRadius:2}]
-    },options:Object.assign({},baseOpts,{
-      indexAxis:'y',
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){
-        return c.parsed.x.toLocaleString()+' negocios · '+((c.parsed.x/prodTotal)*100).toFixed(1)+'% del total';
-      }}}},
-      scales:{x:yT(function(v){return v.toLocaleString();}),y:{ticks:{font:{size:9},color:'#8b949e'},grid:{color:'rgba(48,54,61,.8)'}}}
-    })});
-
-    var empSeg={Corporativo:[779,930,479],Empresarial:[980,1489,804],Oficial:[408,567,293]};
-    mk('ch-emp-growth',{type:'line',data:{labels:['2023','2024','2025'],datasets:segs.map(function(s){
-      return {label:s,data:empSeg[s],borderColor:SEG_COLORS[s],backgroundColor:SEG_COLORS[s].replace('ff','14'),fill:true,tension:.4,pointRadius:4,borderWidth:2};
-    })},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
-        var tot=segs.reduce(function(a,s){return a+empSeg[s][c.dataIndex];},0);
-        return c.dataset.label+': '+c.parsed.y.toLocaleString()+' · '+((c.parsed.y/tot)*100).toFixed(1)+'%';
-      }}}},
-      scales:{x:xT(),y:yT(function(v){return v.toLocaleString();})}
-    })});
-  }
-
-  /* ---- RECIPROCIDAD ---- */
-  if(id==='reciprocidad'){
-    buildKPI('kpi-reciprocidad',[
-      {lbl:'Saldo prom. CC 2024',val:fmt(scc24),delta:((scc24/scc23-1)*100).toFixed(1)+'%',dir:scc24>=scc23?'up':'dn',sub:'vs 2023',w:55,color:'var(--blue)'},
-      {lbl:'Saldo prom. CA 2024',val:fmt(sca24),delta:((sca24/sca23-1)*100).toFixed(1)+'%',dir:sca24>=sca23?'up':'dn',sub:'vs 2023',w:60,color:'var(--green)'},
-      {lbl:'Coef. retención 2024',val:(arrSum(ret.slice(12,24))/12).toFixed(3),delta:'Saldo / Flujo entrada',dir:'neutral',w:30,color:'var(--amber)'},
-      {lbl:'Índice penetración',val:'2.70x',delta:'↑ +25%',dir:'up',sub:'2023→2024',w:68,color:'var(--purple)'}
-    ]);
-
-    mk('ch-recip-dual',{type:'line',data:{labels:MONTHS,datasets:[
-      {label:'Flujos entrada',data:fe,borderColor:'#58a6ff',tension:.4,pointRadius:0,borderWidth:1.5,yAxisID:'y'},
-      {label:'Saldos CC+CA',data:scc.map(function(v,i){return v+sca[i];}),borderColor:'#3fb950',tension:.4,pointRadius:0,borderWidth:1.5,yAxisID:'y1'}
-    ]},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){return c.dataset.label+': '+fmt(c.parsed.y);}}}},
-      scales:{x:xT(),y:Object.assign(yT(),{position:'left'}),y1:Object.assign(yT(),{position:'right',grid:{drawOnChartArea:false}})}
-    })});
-
-    var s23=[arrSum(scc.slice(0,12))/12,arrSum(sca.slice(0,12))/12];
-    var s24=[arrSum(scc.slice(12,24))/12,arrSum(sca.slice(12,24))/12];
-    var s25=[arrSum(scc.slice(24))/scc.slice(24).length,arrSum(sca.slice(24))/sca.slice(24).length];
-    mk('ch-saldos-yr',{type:'bar',data:{labels:['2023','2024','2025'],datasets:[
-      {label:'Saldo CC',data:[s23[0],s24[0],s25[0]],backgroundColor:'rgba(88,166,255,.7)',borderRadius:3,barPercentage:.5},
-      {label:'Saldo CA',data:[s23[1],s24[1],s25[1]],backgroundColor:'rgba(63,185,80,.7)',borderRadius:3,barPercentage:.5}
-    ]},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:true,position:'top',labels:{color:'#8b949e',font:{size:10},boxWidth:9}},
-        tooltip:{mode:'index',callbacks:{label:function(c){
-          var tots=[s23[0]+s23[1],s24[0]+s24[1],s25[0]+s25[1]];
-          return c.dataset.label+': '+fmt(c.parsed.y)+' · '+((c.parsed.y/tots[c.dataIndex])*100).toFixed(1)+'% del saldo';
-        }}}},
-      scales:{x:xT(),y:yT()}
-    })});
-
-    mk('ch-retencion',{type:'line',data:{labels:MONTHS,datasets:[{
-      label:'Coef. retención',data:ret,borderColor:'#bc8cff',backgroundColor:'rgba(188,140,255,.07)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5
-    }]},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){
-        return 'Coef: '+c.parsed.y.toFixed(3)+' ('+( c.parsed.y*100).toFixed(1)+'% del flujo retenido)';
-      }}}},
-      scales:{x:xT(),y:yT(function(v){return v.toFixed(3);})}
-    })});
-  }
-
-  /* ---- ROA ---- */
-  if(id==='roa'){
-    var roa23avg=arrSum(roa.slice(0,12))/12;
-    var roa24avg=arrSum(roa.slice(12,24))/12;
-    buildKPI('kpi-roa',[
-      {lbl:'ROA depósitos 2023',val:roa23avg.toFixed(3)+'%',delta:'Comisiones / Saldo dep. prom.',dir:'neutral',w:56,color:'var(--blue)'},
-      {lbl:'ROA depósitos 2024',val:roa24avg.toFixed(3)+'%',delta:'↑ +'+(((roa24avg-roa23avg)*1000).toFixed(0))+' pbs',dir:'up',w:61,color:'var(--blue)'},
-      {lbl:'Benchmark BdB (oct-2023)',val:'8.99%',delta:'FTP / Prom. depósitos',dir:'neutral',w:60,color:'var(--green)'}
-    ]);
-
-    mk('ch-roa-monthly',{type:'line',data:{labels:MONTHS,datasets:[{
-      label:'ROA dep.',data:roa,borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.07)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5
-    }]},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){
-        return 'ROA: '+c.parsed.y.toFixed(4)+'% · '+((c.parsed.y/8.99)*100).toFixed(1)+'% del benchmark';
-      }}}},
-      scales:{x:xT(),y:yT(function(v){return v.toFixed(3)+'%';})}
-    })});
-
-    var roaSeg={Corporativo:[9.0,9.4,9.8],Empresarial:[7.8,8.1,8.4],Oficial:[7.2,7.6,7.9]};
-    mk('ch-roa-seg',{type:'bar',data:{labels:['2023','2024','2025'],datasets:segs.map(function(s){
-      return {label:s,data:roaSeg[s],backgroundColor:SEG_BG[s],borderRadius:3,barPercentage:.65};
-    })},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
-        return c.dataset.label+': '+c.parsed.y+'% · '+((c.parsed.y/8.99)*100).toFixed(1)+'% del benchmark';
-      }}}},
-      scales:{x:xT(),y:yT(function(v){return v+'%';})}
-    })});
-  }
-
-  /* ---- RoR ---- */
-  if(id==='ror'){
-    buildKPI('kpi-ror',[
-      {lbl:'RoR promedio 2023',val:'4.02%',delta:'Margen neto int. / (Act+Pas)',dir:'neutral',w:40,color:'var(--purple)'},
-      {lbl:'RoR promedio 2024',val:'4.46%',delta:'↑ +44 pbs',dir:'up',w:45,color:'var(--purple)'},
-      {lbl:'Referencia BdB oct-2023',val:'4.46%',delta:'Margen Fin. Neto / Cartera',dir:'neutral',w:45,color:'var(--green)'}
-    ]);
-
-    var rorSeg={Corporativo:[4.22,4.68,4.91],Empresarial:[3.41,3.88,4.02],Oficial:[3.15,3.44,3.51]};
-    mk('ch-ror-seg',{type:'bar',data:{labels:['2023','2024','2025'],datasets:segs.map(function(s){
-      return {label:s,data:rorSeg[s],backgroundColor:SEG_BG[s],borderRadius:3,barPercentage:.65};
-    })},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
-        return c.dataset.label+': '+c.parsed.y+'% · '+((c.parsed.y/4.46)*100).toFixed(1)+'% del ref. BdB';
-      }}}},
-      scales:{x:xT(),y:yT(function(v){return v+'%';})}
-    })});
-
-    var radarVals={Corporativo:[94,95,88,100,82,65],Empresarial:[81,82,72,7,55,85],Oficial:[76,73,68,8,62,45]};
-    mk('ch-radar',{type:'radar',data:{labels:['ROA dep.','RoR','Fondeo vital','MC/empresa','Velocidad','Penetración'],datasets:segs.map(function(s){
-      return {label:s,data:radarVals[s],borderColor:SEG_COLORS[s],backgroundColor:SEG_COLORS[s]+'20',pointBackgroundColor:SEG_COLORS[s],borderWidth:1.5};
-    })},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},
-      plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:9}},
-        tooltip:{callbacks:{label:function(c){return c.dataset.label+' — '+c.label+': '+c.parsed.r+'/100';}}},
-      },
-      scales:{r:{ticks:{font:{size:8},color:'#6e7681',backdropColor:'transparent'},pointLabels:{color:'#8b949e',font:{size:10}},grid:{color:'rgba(48,54,61,.8)'},angleLines:{color:'rgba(48,54,61,.8)'},min:0,max:100}}
-    }});
-  }
-
-  /* ---- FONDEO ---- */
-  if(id==='fondeo'){
-    buildKPI('kpi-fondeo',[
-      {lbl:'Índice fondeo vital 2023',val:'34.2%',delta:'Dep. transacc. / Dep. totales',dir:'neutral',w:34,color:'var(--green)'},
-      {lbl:'Índice fondeo vital 2024',val:'41.7%',delta:'↑ +7.5 pp vs 2023',dir:'up',w:42,color:'var(--green)'},
-      {lbl:'Costo implícito captación',val:'~1.8%',delta:'vs ~6.3% CDT · ahorro 4.5%',dir:'neutral',w:18,color:'var(--red)'}
-    ]);
-
-    mk('ch-fondeo-ev',{type:'bar',data:{labels:['2023','2024','2025(ytd)'],datasets:[
-      {label:'IFV (%)',data:[34.2,41.7,44.1],backgroundColor:'rgba(63,185,80,.75)',borderRadius:4,yAxisID:'y'},
-      {label:'Ahorro fondeo (MM)',data:[6200,8900,4100],backgroundColor:'rgba(88,166,255,.25)',borderRadius:4,yAxisID:'y1'}
-    ]},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:true,position:'top',labels:{color:'#8b949e',font:{size:10},boxWidth:9}},
-        tooltip:{mode:'index',callbacks:{label:function(c){
-          if(c.dataset.yAxisID==='y') return 'IFV: '+c.parsed.y+'% · +'+(c.parsed.y-34.2).toFixed(1)+'pp desde 2023';
-          return 'Ahorro fondeo: '+fmt(c.parsed.y);
-        }}}},
-      scales:{x:xT(),y:Object.assign(yT(function(v){return v+'%';}),{position:'left'}),y1:Object.assign(yT(),{position:'right',grid:{drawOnChartArea:false}})}
-    })});
-
-    mk('ch-saldos-monthly',{type:'line',data:{labels:MONTHS,datasets:[
-      {label:'Saldo CC',data:scc,borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.06)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5},
-      {label:'Saldo CA',data:sca,borderColor:'#3fb950',backgroundColor:'rgba(63,185,80,.06)',fill:true,tension:.4,pointRadius:0,borderWidth:1.5}
-    ]},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:true,position:'top',labels:{color:'#8b949e',font:{size:10},boxWidth:9}},
-        tooltip:{mode:'index',callbacks:{label:function(c){
-          var tot=scc[c.dataIndex]+sca[c.dataIndex];
-          return c.dataset.label+': '+fmt(c.parsed.y)+' · '+((c.parsed.y/tot)*100).toFixed(1)+'% del total';
-        }}}},
-      scales:{x:xT(),y:yT()}
-    })});
-  }
-
-  /* ---- VELOCIDAD ---- */
-  if(id==='velocidad'){
-    var vel23avg=arrSum(vel.slice(0,12))/12;
-    var vel24avg=arrSum(vel.slice(12,24))/12;
-    buildKPI('kpi-velocidad',[
-      {lbl:'Velocidad transacc. 2023',val:vel23avg.toFixed(2)+'x',delta:'Flujos / Saldo prom. CC+CA',dir:'neutral',w:40,color:'var(--amber)'},
-      {lbl:'Velocidad transacc. 2024',val:vel24avg.toFixed(2)+'x',delta:'↑ +'+((vel24avg/vel23avg-1)*100).toFixed(0)+'% activación negocios',dir:'up',w:86,color:'var(--amber)'},
-      {lbl:'Días de permanencia prom.',val:'~42 días',delta:'Saldo × 365 / Flujos entrada',dir:'neutral',w:35,color:'var(--red)'}
-    ]);
-
-    mk('ch-velocidad',{type:'line',data:{labels:MONTHS,datasets:[{
-      label:'Velocidad',data:vel,borderColor:'#d29922',backgroundColor:'rgba(210,153,34,.07)',fill:true,tension:.4,pointRadius:0,borderWidth:2
-    }]},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){
-        var dias=c.parsed.y>0?Math.round(365/c.parsed.y):'—';
-        return 'Velocidad: '+c.parsed.y.toFixed(2)+'x · Días perm: ~'+dias+'d';
-      }}}},
-      scales:{x:xT(),y:yT(function(v){return v+'x';})}
-    })});
-
-    var velSeg={Corporativo:[4.1,9.2,9.8],Empresarial:[3.4,6.8,7.2],Oficial:[3.8,8.1,8.6]};
-    mk('ch-vel-seg',{type:'bar',data:{labels:['2023','2024','2025'],datasets:segs.map(function(s){
-      return {label:s,data:velSeg[s],backgroundColor:SEG_BG[s],borderRadius:3,barPercentage:.65};
-    })},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){
-        var dias=c.parsed.y>0?Math.round(365/c.parsed.y):'—';
-        return c.dataset.label+': '+c.parsed.y+'x · ~'+dias+' días perm.';
-      }}}},
-      scales:{x:xT(),y:yT(function(v){return v+'x';})}
-    })});
-  }
-
-  /* ---- CLIENTES ---- */
-  if(id==='clientes'){
-    buildKPI('kpi-clientes',[
-      {lbl:'Comisión acum. top 1',val:'$764K',delta:'EPS Sanitas · 31.5% del total',dir:'neutral',w:100,color:'var(--blue)'},
-      {lbl:'Concentración top 3',val:'50.3%',delta:'↑ Riesgo concentración alto',dir:'dn',w:50,color:'var(--red)'},
-      {lbl:'Comisión prom. top 15',val:'$113K',delta:'Promedio por empresa',dir:'neutral',w:45,color:'var(--green)'}
-    ]);
-
-    var concData=[764074,355477,103443,57126,1143576];
-    var concTotal=concData.reduce(function(a,b){return a+b;},0);
-    mk('ch-concentracion',{type:'doughnut',data:{
-      labels:['EPS Sanitas 31.5%','Mercadopago 14.7%','Fid. Bogotá 4.3%','Terpel 2.4%','Resto 47.2%'],
-      datasets:[{data:concData,backgroundColor:['#58a6ff','#3fb950','#d29922','#bc8cff','#30363d'],borderWidth:0,hoverOffset:4}]
-    },options:Object.assign({},baseOpts,{
-      cutout:'62%',
-      plugins:{legend:{display:true,position:'right',labels:{color:'#8b949e',font:{size:9},boxWidth:9,padding:5}},
-        tooltip:{callbacks:{label:function(c){return c.label+': '+fmt(c.parsed)+' · '+((c.parsed/concTotal)*100).toFixed(1)+'%';}}}}
-    })});
-  }
-
-  /* ---- MAESTRO ---- */
-  if(id==='maestro'){
-    mk('ch-kpi-growth',{type:'bar',data:{labels:['Comisiones','Flujos entrada','Negocios gan.','Empresas cap.','ROA dep.','RoR'],datasets:[
-      {label:'2023→2024',data:[12.0,135.8,45.1,31.6,8.1,10.9],backgroundColor:'rgba(88,166,255,.8)',borderRadius:3,barPercentage:.5},
-      {label:'2024→2025p',data:[26.0,20.0,5.0,8.0,7.0,4.8],backgroundColor:'rgba(63,185,80,.7)',borderRadius:3,barPercentage:.5}
-    ]},options:Object.assign({},baseOpts,{
-      plugins:{legend:{display:true,position:'top',labels:{color:'#8b949e',font:{size:10},boxWidth:9}},
-        tooltip:{callbacks:{label:function(c){return c.dataset.label+' — '+c.label+': '+c.parsed.y+'%';}}}},
-      scales:{x:xT(),y:yT(function(v){return v+'%';})}
-    })});
-
-    var radarVals2={Corporativo:[94,95,88,100,82,65],Empresarial:[81,82,72,7,55,85],Oficial:[76,73,68,8,62,45]};
-    mk('ch-radar2',{type:'radar',data:{labels:['ROA dep.','RoR','Fondeo vital','MC/empresa','Velocidad','Penetración'],datasets:ALL_SEGS.map(function(s){
-      return {label:s,data:radarVals2[s],borderColor:SEG_COLORS[s],backgroundColor:SEG_COLORS[s]+'20',pointBackgroundColor:SEG_COLORS[s],borderWidth:1.5};
-    })},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},
-      plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:9}}},
-      scales:{r:{ticks:{font:{size:8},color:'#6e7681',backdropColor:'transparent'},pointLabels:{color:'#8b949e',font:{size:10}},grid:{color:'rgba(48,54,61,.8)'},angleLines:{color:'rgba(48,54,61,.8)'},min:0,max:100}}
-    }});
-
-    mk('ch-matrix',{type:'bubble',data:{datasets:ALL_SEGS.map(function(s){
-      var xv={Corporativo:5362,Empresarial:126,Oficial:598}[s];
-      var yv={Corporativo:860,Empresarial:101,Oficial:41}[s];
-      var rv={Corporativo:22,Empresarial:14,Oficial:10}[s];
-      return {label:s,data:[{x:xv,y:yv,r:rv}],backgroundColor:SEG_BG[s],borderColor:SEG_COLORS[s],borderWidth:1};
-    })},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},
-      plugins:{legend:{display:true,position:'top',labels:{color:'#8b949e',font:{size:10},boxWidth:9}},
-        tooltip:{callbacks:{label:function(c){
-          var totFe=5362+126+598, totCom=860+101+41;
-          return [c.dataset.label,'Flujos: $'+c.parsed.x+'M ('+((c.parsed.x/totFe)*100).toFixed(1)+'%)','Comisiones: $'+c.parsed.y+'K ('+((c.parsed.y/totCom)*100).toFixed(1)+'%)'];
-        }}}},
-      scales:{
-        x:Object.assign(yT(function(v){return '$'+v+'M';}),{title:{display:true,text:'Flujos de entrada (MM COP)',color:'#6e7681',font:{size:11}}}),
-        y:Object.assign(yT(function(v){return '$'+v+'K';}),{title:{display:true,text:'Comisiones (K COP)',color:'#6e7681',font:{size:11}}})
-      }
-    }});
-  }
-}
-
-/* ===== INIT ===== */
-window.addEventListener('load',function(){setTimeout(function(){refreshPage('overview');},100);});
-</script>
-</body>
-</html>
+function safeDraw(v,tries){tries=tries||0;if(typeof Chart==='undefined'){if(tries<40)return setTimeout(()=>safeDraw(v,tries+1),100);return;}setChartDefaults();try{draw(v);}catch(e){console.warn(e);}}
+function show(v){document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active',a.dataset.v===v));
+ try{document.getElementById('main').innerHTML='<div class="view active">'+V[v]()+'</div>';}catch(e){document.getElementById('main').innerHTML='<div class="head"><h2>Error</h2><p>'+e.message+'</p></div>';}
+ safeDraw(v);}
+document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',()=>show(a.dataset.v)));
+function init(){show('resumen');}if(document.readyState!=='loading')init();else document.addEventListener('DOMContentLoaded',init);
+</script></body></html>
