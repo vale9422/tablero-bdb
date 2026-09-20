@@ -1,4 +1,4 @@
-PE html>
+<!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Cash Management BdB · Tablero de Rentabilidad 2023–2025</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -169,7 +169,7 @@ V.impacto=()=>`<div class="head"><div class="crumb">Objetivo 1</div><h2>Impacto 
 
 V.kpis=()=>`<div class="head"><div class="crumb">Objetivo 5</div><h2>Indicadores (KPIs)</h2><p>Seis indicadores que sustentan el análisis, cada uno asociado a una dimensión del objetivo general.</p></div>
 ${[['ROA de Depósitos','Comisiones / Saldo promedio captado','Rentabilidad por comisión de cada peso de saldo. Adapta el ROA tradicional al negocio.'],
-['Margen de valor','Comisiones + (Saldo × FTP/12 × meses)','Integra comisión y valor del fondeo. FTP: supuesto conservador del 8,5% anual; el hallazgo es robusto para cualquier FTP > 0,8%.'],
+['Margen de valor','Comisiones + (Saldo × FTP/12 × meses)','Integra comisión y valor del fondeo. El FTP de 8,5% es un parámetro de referencia, no una tasa observada; el hallazgo es robusto para cualquier FTP > 0,8%.'],
 ['Índice de Fondeo Vital','Saldo promedio / Flujo de entrada','Proporción del flujo que permanece como saldo. Mide reciprocidad estable.'],
 ['Velocidad Transaccional','Flujo total / Saldo promedio','Rotación del saldo (adaptación de MV=PQ de Fisher).'],
 ['Return on Relationship','Comisiones / Flujo total','Comisión efectiva por peso movilizado (tarifa relacional implícita).'],
@@ -215,54 +215,55 @@ ${CI.top_comisiones.slice(0,8).map(c=>`<tr><td>${c.nombre}</td><td><span class="
 <div class="panel"><h3><span class="bar"></span>Mapa de perfiles: saldo vs. comisión</h3><div class="sub">Cada punto es una empresa destacada. Eje X: saldo (fondeo); Eje Y: comisiones</div><div class="chartbox"><canvas id="c_scatter"></canvas></div>
 <div class="note">Los dos arquetipos son claros: <b>aportantes de fondeo</b> (alto saldo, baja comisión — típicamente Oficial) y <b>aportantes de comisión</b> (alta comisión, saldo bajo — Corporativo/Empresarial). La rentabilidad del área no se juzga con una sola métrica.</div></div>`;
 
+const donaLabels={id:'donaLabels',afterDatasetsDraw(ch){const{ctx}=ch;const meta=ch.getDatasetMeta(0);const data=ch.data.datasets[0].data;const total=data.reduce((a,b)=>a+b,0);meta.data.forEach((arc,i)=>{const p=data[i]/total*100;if(p<2.5)return;const pos=arc.tooltipPosition();ctx.save();ctx.fillStyle='#fff';ctx.font='600 12px "IBM Plex Sans",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.toFixed(1).replace('.',',')+'%',pos.x,pos.y);ctx.restore();});}};
 function draw(v){
  if(v==='individual'){
   const pts=(arr,col)=>arr.map(c=>({x:c.saldo/1e6,y:c.comisiones,nombre:c.nombre}));
   mk('c_scatter',{type:'scatter',data:{datasets:[
    {label:'Top por valor (fondeo)',data:pts(CI.top_valor),backgroundColor:'#C8A04B',pointRadius:7},
    {label:'Top por comisión',data:pts(CI.top_comisiones),backgroundColor:'#0A6BD8',pointRadius:7}]},
-   options:{maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Saldo promedio (billones COP)'}},y:{title:{display:true,text:'Comisiones (M COP)'},type:'logarithmic'}},
+   options:{maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Saldo promedio (billones COP)'}},y:{title:{display:true,text:'Comisiones acumuladas (millones COP, escala logarítmica)'},type:'logarithmic'}},
    plugins:{tooltip:{callbacks:{label:c=>c.raw.nombre+': saldo $'+fP(c.raw.x,2)+'B, com '+fM(c.raw.y)+'M'}}}}});
  }
  if(v==='limpieza'){
   const segs=['Corporativo','Empresarial','Oficial'];
   mk('c_corrseg',{type:'bar',data:{labels:segs,datasets:[{label:'Celdas corruptas',data:segs.map(s=>CR.por_segmento[s]||0),backgroundColor:segs.map(s=>SC[s])}]},
-   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fM(c.parsed.y)+' celdas'}}}}});
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fM(c.parsed.y)+' celdas'}}},scales:{y:{title:{display:true,text:'Número de celdas corruptas'}}}}});
  }
  if(v==='resumen'){
   mk('c_val',{type:'bar',data:{labels:SEG,datasets:[
    {label:'Comisiones',data:SEG.map(s=>S[s].comisiones_tot/1e6),backgroundColor:'#0A6BD8'},
    {label:'Valor del fondeo',data:SEG.map(s=>S[s].valor_fondeo/1e6),backgroundColor:'#C8A04B'}]},
-   options:{maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'Billones COP'}}},plugins:{tooltip:{callbacks:{label:c=>` ${c.dataset.label}: $${fP(c.parsed.y,2)} B`}}}}});
+   options:{maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'Valor generado (billones COP)'}}},plugins:{tooltip:{callbacks:{label:c=>` ${c.dataset.label}: $${fP(c.parsed.y,2)} B`}}}}});
   mk('c_dona',{type:'doughnut',data:{labels:SEG,datasets:[{data:SEG.map(s=>S[s].saldo_prom_tot/1e6),backgroundColor:SEG.map(s=>SC[s]),borderColor:'#121C2E',borderWidth:2}]},
-   options:{maintainAspectRatio:false,cutout:'58%',plugins:{tooltip:{callbacks:{label:c=>` ${c.label}: $${fP(c.parsed,2)} B (${fP(100*c.parsed/SEG.reduce((a,s)=>a+S[s].saldo_prom_tot/1e6,0),1)}%)`}}}}});
+   options:{maintainAspectRatio:false,cutout:'58%',plugins:{tooltip:{callbacks:{label:c=>` ${c.label}: $${fP(c.parsed,2)} billones (${fP(100*c.parsed/SEG.reduce((a,s)=>a+S[s].saldo_prom_tot/1e6,0),1)}%)`}}},},plugins:[donaLabels]});
   mk('c_evol',{type:'line',data:{labels:M.meses,datasets:SEG.filter(s=>M.comisiones_entrada[s]).map(s=>({label:s,data:M.comisiones_entrada[s],borderColor:SC[s],backgroundColor:'transparent',tension:.3,pointRadius:0,borderWidth:2}))},
-   options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{maxTicksLimit:12}},y:{title:{display:true,text:'M COP'}}}}});
+   options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fM(c.parsed.y)} M COP`}}},scales:{x:{ticks:{maxTicksLimit:12}},y:{title:{display:true,text:'Comisiones de entrada mensuales (millones COP)'}}}}});
  }
  if(v==='rentab'){
   mk('c_roa',{type:'bar',data:{labels:SEG,datasets:[{label:'ROA Dep. (%)',data:SEG.map(s=>S[s].roa_depositos*100),backgroundColor:SEG.map(s=>SC[s])}]},
-   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fP(c.parsed.y,2)}%`}}},scales:{y:{title:{display:true,text:'%'}}}}});
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fP(c.parsed.y,2)}%`}}},scales:{y:{title:{display:true,text:'ROA de Depósitos acumulado, 29 meses (%)'}}}}});
   mk('c_vel',{type:'bar',data:{labels:SEG,datasets:[{label:'Velocidad',data:SEG.map(s=>S[s].velocidad),backgroundColor:SEG.map(s=>SC[s])}]},
-   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fP(c.parsed.y,1)} rotaciones`}}}}});
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fP(c.parsed.y,1)} rotaciones`}}},scales:{y:{title:{display:true,text:'Rotaciones del saldo en el periodo (veces)'}}}}});
  }
  if(v==='recipro'){
   mk('c_ifv',{type:'bar',data:{labels:SEG,datasets:[{label:'IFV',data:SEG.map(s=>S[s].ifv),backgroundColor:SEG.map(s=>SC[s])}]},
-   options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` IFV: ${fP(c.parsed.x,4)}`}}}}});
+   options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` IFV: ${fP(c.parsed.x,4)}`}}},scales:{x:{title:{display:true,text:'IFV = saldo promedio / flujo de entrada (proporción)'}}}}});
   mk('c_saldo',{type:'line',data:{labels:M.meses,datasets:SEG.filter(s=>M.saldo_cc[s]).map(s=>({label:s,data:M.saldo_cc[s].map(x=>x/1e6),borderColor:SC[s],backgroundColor:'transparent',tension:.3,pointRadius:0,borderWidth:2}))},
-   options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{maxTicksLimit:10}},y:{title:{display:true,text:'M COP'}}}}});
+   options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{tooltip:{callbacks:{label:c=>` ${c.dataset.label}: $${fP(c.parsed.y,2)} billones`}}},scales:{x:{ticks:{maxTicksLimit:10}},y:{title:{display:true,text:'Saldo en cuentas corrientes (billones COP)'}}}}});
  }
  if(v==='negocios'){
-  mk('c_cos',{type:'bar',data:{labels:Object.keys(R.cosecha_anio).filter(a=>a>='2023'),datasets:[{label:'Negocios',data:Object.entries(R.cosecha_anio).filter(([a])=>a>='2023').map(([,v])=>v),backgroundColor:'#0A6BD8'}]},
-   options:{maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  mk('c_cos',{type:'bar',data:{labels:Object.keys(R.cosecha_anio).filter(a=>a>='2023').map(a=>a==='2025'?'2025 (a mayo)':a),datasets:[{label:'Negocios',data:Object.entries(R.cosecha_anio).filter(([a])=>a>='2023').map(([,v])=>v),backgroundColor:'#0A6BD8'}]},
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fM(c.parsed.y)} negocios`}}},scales:{y:{title:{display:true,text:'Número de negocios ganados'}}}}});
   const pr=Object.entries(R.cosecha_producto).slice(0,8);
   mk('c_prod',{type:'bar',data:{labels:pr.map(p=>p[0]),datasets:[{data:pr.map(p=>p[1]),backgroundColor:'#C8A04B'}]},
-   options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}}}});
+   options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fM(c.parsed.x)} negocios`}}},scales:{x:{title:{display:true,text:'Número de negocios ganados'}}}}});
  }
  if(v==='impacto'){
   mk('c_imp',{type:'bar',data:{labels:['Antes (6m)','Después (6m)'],datasets:[{data:[IMPS.pre_med,IMPS.post_med],backgroundColor:['#595959','#2DD4A7']}]},
-   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fP(c.parsed.y,1)} M COP`}}},scales:{y:{title:{display:true,text:'Saldo mediano mensual (M)'}}}}});
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fP(c.parsed.y,1)} M COP`}}},scales:{y:{title:{display:true,text:'Saldo mediano mensual (millones COP)'}}}}});
   mk('c_imp2',{type:'bar',data:{labels:['Antes (6m)','Después (6m)'],datasets:[{data:[IMP.pre_prom,IMP.post_prom],backgroundColor:['#595959','#5B9BE8']}]},
-   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fP(c.parsed.y,3)} M COP`}}},scales:{y:{title:{display:true,text:'Comisión media mensual (M)'}}}}});
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fP(c.parsed.y,3)} M COP`}}},scales:{y:{title:{display:true,text:'Comisión media mensual (millones COP)'}}}}});
  }
 }
 function safeDraw(v,tries){tries=tries||0;if(typeof Chart==='undefined'){if(tries<40)return setTimeout(()=>safeDraw(v,tries+1),100);return;}setChartDefaults();try{draw(v);}catch(e){console.warn(e);}}
